@@ -41,7 +41,7 @@
 
 #include "AliHFMassFitter.h"
 #include "AliVertexingHFUtils.h"
-
+#include "AliLog.h"
 
 using std::cout;
 using std::endl;

@@ -4,4 +4,8 @@
 #pragma link off all functions;
 #pragma link C++ nestedclasses;
 
+#pragma link C++ class AliHFMassFitter+;
+#pragma link C++ class AliHFInvMassFitter+;
+#pragma link C++ class AliLog+;
+
 #endif
