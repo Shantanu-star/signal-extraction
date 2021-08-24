@@ -22,9 +22,12 @@ Double_t maxMassForFit=2.0;
 //Int_t rebin[nPtBins]={2,2,1,1,2};
 const Int_t nPtBins=15;
 Double_t ptlims[nPtBins+1]={0.,3.};
-Int_t rebin[nPtBins]={.2};
+Int_t rebin[nPtBins]={2};
 Int_t typeb=2;
 Int_t types=kGaus;
+
+using std::cout;
+using std::endl;
 
 void FitXicZerotoXiPiInvMass(TString fname, TString fNameOut=""){
   TFile *f = TFile::Open(fname.Data());
@@ -44,14 +47,14 @@ void FitXicZerotoXiPiInvMass(TString fname, TString fNameOut=""){
   float         pT;
   float         mva;
 
-  TBranch        *mass;
-  TBranch        *pT;
+  TBranch        *mass_branch;
+  TBranch        *pT_branch;
   TBranch        *b_mva;
 
   TTree *t = (TTree*)f->Get("t1");
     
-  t->SetBranchAddress("mass", &mass, &mass);
-  t->SetBranchAddress("pT", &pT, &pT);
+  t->SetBranchAddress("mass_branch", &mass, &mass_branch);
+  t->SetBranchAddress("pT_branch", &pT, &pT_branch);
   t->SetBranchAddress("MVA2", &mva, &b_mva);
 
     TH2F *hMassVsPt[20];
@@ -68,7 +71,7 @@ void FitXicZerotoXiPiInvMass(TString fname, TString fNameOut=""){
   for(Int_t i=0;i<nPtBins;i++) {
     hMass[i]=0x0;
   }
-  AliHFInvMassFitter.h** fitter=new AliHFInvMassFitter.h*[10];
+  AliHFMassFitter** fitter=new AliHFMassFitter*[10];
 
     cout<< "1"<<endl;
     
@@ -103,7 +106,7 @@ for(int j =0; j<10; j++){
 //    fitter[i]->SetFixGaussianSigma(0.010);
   fitter[i]->SetInitialGaussianSigma(0.010);
 
-    Printf("mean = %f\n", fitter[i][j]->GetMean());
+    Printf("mean = %f\n", fitter[i][j].GetMean());
     //Printf("mean = %f, sigma = %f \n", fitter[i]->GetMean(), fitter[i]->GetSigma());
 
     //fitter[i]->SetInitialGaussianSigma(0.012);
@@ -115,7 +118,7 @@ for(int j =0; j<10; j++){
       cout << ".........I am sorry" <<endl;
       fitter[i]->GetHistoClone()->Draw();
     }
-    // Double_t mass=fitter[i]->GetMean();
+    // Double_t mass_branch=fitter[i]->GetMean();
     //Double_t massErr= fitter[i]->GetMeanUncertainty();
     // Double_t sigma=fitter[i]->GetSigma();
     // Double_t sigmaErr=fitter[i]->GetSigmaUncertainty();
@@ -132,3 +135,8 @@ for(int j =0; j<10; j++){
     }
 }
 
+int main(){
+  TString name = "";
+  FitXicZerotoXiPiInvMass(name);
+  return 0;
+}
