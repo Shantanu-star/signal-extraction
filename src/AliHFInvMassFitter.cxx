@@ -22,6 +22,7 @@
 #include <TStyle.h>
 #include <TPaveText.h>
 #include "AliHFInvMassFitter.h"
+#include "AliVertexingHFUtils.h"
 
 /// \cond CLASSIMP
 ClassImp(AliHFInvMassFitter);
@@ -973,26 +974,8 @@ void AliHFInvMassFitter::Significance(Double_t min, Double_t max, Double_t &sign
     errsignificance=0;
     return;
   }
-  
-  void ComputeSignificance(Double_t signal, Double_t  errsignal, Double_t  background, Double_t  errbackground, Double_t &significance,Double_t &errsignificance){
-  /// calculate significance from S, B and errors
 
-
-  Double_t errSigSq=errsignal*errsignal;
-  Double_t errBkgSq=errbackground*errbackground;
-  Double_t sigPlusBkg=signal+background;
-  if(sigPlusBkg>0. && signal>0.){
-    significance =  signal/TMath::Sqrt(signal+background);
-    errsignificance = significance*TMath::Sqrt((errSigSq+errBkgSq)/(4.*sigPlusBkg*sigPlusBkg)+(background/sigPlusBkg)*errSigSq/signal/signal);
-  }else{
-    significance=0.;
-    errsignificance=0.;
-  }
-  return;
-
-}
-  
-  ComputeSignificance(fRawYield,fRawYieldErr,background,errbackground,significance,errsignificance);
+  AliVertexingHFUtils::ComputeSignificance(fRawYield,fRawYieldErr,background,errbackground,significance,errsignificance);
 
   return;
 }
