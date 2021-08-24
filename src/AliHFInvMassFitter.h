@@ -16,10 +16,12 @@
 
 
 #include <TNamed.h>
+#include <TH1.h>
+#include <TF1.h>
+
 #include "AliLog.h"
 
-class TF1;
-class TH1F;
+class TVirtualPad;
 
 class AliHFInvMassFitter : public TNamed {
  public:
