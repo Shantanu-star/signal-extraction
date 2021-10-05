@@ -610,14 +610,14 @@ TF1* AliHFInvMassFitter::CreateSignalFitFunction(TString fname, Double_t integsi
     funcsig->SetParameter(1,fMass);
     if(fFixedMean) funcsig->FixParameter(1,fMass);
     funcsig->SetParameter(2,fSigmaSgn);
-    funcsig->SetParLimits(2,0.004,0.05);
+    funcsig->SetParLimits(2,0.001,0.05);
     if(fFixedSigma) funcsig->FixParameter(2,fSigmaSgn);
     funcsig->SetParameter(3,fFrac2Gaus);
     if(fFixedFrac2Gaus) funcsig->FixParameter(3,fFrac2Gaus);
     else funcsig->SetParLimits(3,0.,1.);
     funcsig->SetParameter(4,fSigmaSgn2Gaus);
     if(fFixedSigma2Gaus) funcsig->FixParameter(4,fSigmaSgn2Gaus);
-    else funcsig->SetParLimits(4,0.004,0.05);
+    else funcsig->SetParLimits(4,0.001,0.05);
     funcsig->SetParNames("SgnInt","Mean","Sigma1","Frac","Sigma2");
   }
   if(fTypeOfFit4Sgn==k2GausSigmaRatioPar){
