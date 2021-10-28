@@ -15,6 +15,9 @@ For the installion of the class kindly follow the following steps:
 
 ## Usage
 To use the class, one needs to export it to root as a library
+
 - `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/the/path/to/build/src/`
+
 It has a test.cpp file and one can use it to check whether everything has been done properly
+
 - `root -l test.cpp`
