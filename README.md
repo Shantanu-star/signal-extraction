@@ -1,7 +1,7 @@
 # Alice Heavy flavor class for invariant mass fitting
 This class can be used for fitting an invariant mass histogram. It has multiple options for signal and background functions.
 
-# Installation
+## Installation
 For the installion of the class kindly follow the following steps:
 1. Clone this repository
 - `git clone git@git.cbm.gsi.de:sh.khan/signal_extraction.git`
@@ -13,7 +13,7 @@ For the installion of the class kindly follow the following steps:
 4. Compile and install the code
 - `make -j install`
 
-# Usage
+## Usage
 To use the class, one needs to export it to root as a library
 - `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/the/path/to/build/src/`
 It has a test.cpp file and one can use it to check whether everything has been done properly
