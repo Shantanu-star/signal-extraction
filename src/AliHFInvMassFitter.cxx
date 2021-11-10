@@ -265,6 +265,9 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
       status=0;
     }
   }
+    if(fTypeOfFit4Bkg==3){
+      status=0;
+  }
   else status=fHistoInvMass->Fit("funcbkgsb",Form("R,%s,+,0",fFitOption.Data()));
   fBkgFuncSb->SetLineColor(kGray+1);
   if (status != 0){
