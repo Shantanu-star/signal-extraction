@@ -29,15 +29,18 @@ enum { kGaus = 0,
     {
     
     vector<Double_t> red_chi2, y_bin_low1, pt_bin_low1;
+    //open the root file containing the tree (t1) with lambda candidates
     TFile* f = TFile::Open(fname.Data(), "read");    
     TTree* t = f->Get<TTree>("t1");
     
+    // Create variables for branches and then take those branches from the tree (t)
     float mass, pT, rapidity, MCmass, MCpT, MCrapidity;Double_t issignal;
     t->SetBranchAddress("mass", &mass);t->SetBranchAddress("pT",&pT);t->SetBranchAddress("rapidity",&rapidity);t->SetBranchAddress("issignal",&issignal);
     auto* canvas = new TCanvas(" canvas ","", 500,500);
     canvas->SetBottomMargin(0.15);
     canvas->SetLeftMargin (0.15);
-    //canvas->SetLogy();
+    
+    //I am dividing the data into pt-y bins of 0.2 size
     float y_bin_low=-0.2, y_bin_up =0;
     for (int i = 0; i<15; i++)
       {
@@ -49,8 +52,10 @@ enum { kGaus = 0,
         pt_bin_low = pt_bin_low+0.2;
         pt_bin_up = pt_bin_up+0.2;
         
+        //The histogram which will contain both signal and background candidates
         TH1F* h1 = new TH1F("h1", Form("rapidity=[%g,%g] & p_{T}=[%g,%g]",y_bin_low,y_bin_up,pt_bin_low,pt_bin_up), 200, 1.08, 1.2);
         h1 -> SetStats (0);
+        //The histogram which will be filled with signal only
         TH1F* h0 = new TH1F("h0",Form("rapidity=[%g,%g] & p_{T}=[%g,%g]",y_bin_low,y_bin_up,pt_bin_low,pt_bin_up), 200, 1.08, 1.2);
         
         for (int i =0; i < t->GetEntries(); i++)
@@ -74,14 +79,15 @@ enum { kGaus = 0,
                 Double_t minMassForFit0 = h0->GetMean()-4*(h0->GetRMS());
                 Double_t maxMassForFit0 = h0->GetMean()+4*(h0->GetRMS());              
 
+                //use the Alice class to fit the signal only histogram
                 AliHFInvMassFitter* fitter0 = new AliHFInvMassFitter(h0, minMassForFit0, maxMassForFit0,   typeb, types);
                 fitter0->SetInitialGaussianMean(1.1156);
                 fitter0->SetInitialGaussianSigma(0.0009);
                 //fitter0->SetInitialFrac2Gaus(0.2);
                 fitter0->SetInitialSecondGaussianSigma(0.0009);
-                //fitter->SetPolDegreeForBackgroundFit(0);
-                TF1 *f2 = new TF1("double_gaus",double_gaus,minMassForFit0,maxMassForFit0,5);
-                //TF1* f2 = new TF1("full","[0]*((1-[3])*exp(-0.5*((x-[2])/[1])^2)+[3]*exp(-0.5*((x-[2])/[4])^2)) ",minMassForFit0,maxMassForFit0);
+                
+                //use the root basic fitting to fit the h0
+                TF1* f2 = new TF1("full","[0]*((1-[3])*exp(-0.5*((x-[2])/[1])^2)+[3]*exp(-0.5*((x-[2])/[4])^2)) ",minMassForFit0,maxMassForFit0);
                 f2->SetParameters(0,1.1156,0.001,0.2,0.0009);
                 h0->Fit(f2,"MNRI","L",minMassForFit0,maxMassForFit0);
                 
