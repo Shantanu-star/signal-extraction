@@ -16,6 +16,8 @@ using namespace std;
 // #include "AliHFMassFitter.h"
 #endif
 
+
+//modify the invariant mass histogram for better visualization; accepts a TH1F object and returns a TH1F object
 TH1F* PlotHistos(TH1F* mc){
   mc->SetMarkerColor(kBlack);
   mc->SetMarkerSize(0.8);
@@ -37,7 +39,7 @@ TH1F* PlotHistos(TH1F* mc){
 //  mc->GetYaxis()->SetRangeUser(0, 3000);
   return mc;
 }
-
+//modify signal function for better visualization; accepts a TF1 object and returns a TF1 object
 TF1* PlotSignal(TF1* sig_func)
   {
   sig_func->SetNpx(1000);
@@ -46,7 +48,7 @@ TF1* PlotSignal(TF1* sig_func)
   sig_func->SetLineWidth(4);
   return sig_func;
   }
-
+//modify background function for better visualization; accepts a TF1 object and returns a TF1 object
 TF1* PlotBackground(TF1* bac_func)
   {  
   bac_func->SetNpx(100);
@@ -56,6 +58,7 @@ TF1* PlotBackground(TF1* bac_func)
   return bac_func;
   }
  
+//modify total mass fit function for better visualization; accepts a TF1 object and returns a TF1 object
 TF1* PlotMass(TF1* M_func)
   { 
   M_func->SetNpx(10000);
@@ -64,7 +67,8 @@ TF1* PlotMass(TF1* M_func)
   M_func->SetLineColor(kRed);
   return M_func;
   }
-  
+
+//creates a canvas
 TCanvas* CreateCanvas()
   {
     auto* canvas = new TCanvas(" canvas ","", 500,500);
@@ -93,6 +97,7 @@ TPad* CreatePad1()
    return pad2;
  }
 
+//plots legend; accepts a TH1F and 3 TF1 objects, returns a TLegend object
 TLegend* legend_plot(TH1F* h1, TF1* M_func, TF1* sig_func, TF1* bac_func)
 {
   TLegend* legend = new TLegend(0.5,0.4,0.8,0.7);
@@ -108,7 +113,7 @@ TLegend* legend_plot(TH1F* h1, TF1* M_func, TF1* sig_func, TF1* bac_func)
   legend->Draw();
   return legend;
   }
-  
+//creates a TH2F object 
 TH2F* hist2d_pt_y()
 {
   TH2F* h4 = new TH2F("", "", 15,0,3,15,0,3);
@@ -124,7 +129,7 @@ TH2F* hist2d_pt_y()
   return h4;
 }
 
-
+//Plots a histogram which is filled with data-fit / delta data
 TH1F* dif_hist(TH1F* h3) 
 {
     h3 -> SetLineWidth(3);
@@ -147,7 +152,7 @@ TH1F* dif_hist(TH1F* h3)
     return h3;
 }
 
-
+//creates efficiency files
 void eff_creator(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low1, vector<Double_t> &yield, vector<Double_t> &yield_error, vector<Double_t> &sim_mc_yield){
 
   //TTree* t = new TTree("t1","tree");
@@ -219,7 +224,7 @@ void eff_creator(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low1, ve
   ff->Write();
   ff->Close();
 }
-
+//A double gaussian 
    Double_t double_gaus(Double_t *x, Double_t *par)
 {
    Double_t f1 = par[0]*((1.-par[3])/TMath::Sqrt(2.*TMath::Pi())/par[2]*TMath::Exp(-(x[0]-par[1])*(x[0]-par[1])/2./par[2]/par[2]));
@@ -238,10 +243,5 @@ void eff_creator(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low1, ve
 {
    Double_t f2 = par[0]*(par[3]/TMath::Sqrt(2.*TMath::Pi())/par[4]*TMath::Exp(-(x[0]-par[1])*(x[0]-par[1])/2./par[4]/par[4]));
    return f2;
-}
-
-void dcm_efficeincy_creator(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low1, vector<Double_t> &sim_mc_yield)
-{
-
 }
 
