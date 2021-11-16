@@ -30,15 +30,15 @@ enum { kGaus = 0,
   vector<Double_t> FitXicZerotoXiPiInvMass2(TString fname, TString fNameOut = "") 
     {
     
-    
+    //open files
     TFile* f = TFile::Open(fname.Data(), "read");    
     TTree* t = f->Get<TTree>("t1"); TTree* t1 = f->Get<TTree>("t2");
-    TFile *f1 = TFile::Open("/home/shahid/cbmsoft/Cut_optimization/uncut_data/Project/lambda_qa_dcm.root");
+    TFile *f1 = TFile::Open("/home/shahid/cbmsoft/Cut_optimization/uncut_data/Project/lambda_qa_urqmd.root");
     TDirectory* dir = (TDirectory*)f1->Get("SimParticles_McLambda");
     TH2D *mc_spectra = (TH2D*)dir->Get("SimParticles_rapidity_SimParticles_pT_McLambda");
     TFile* f2 = TFile::Open("/home/shahid/cbmsoft/Cut_optimization/uncut_data/Project/new_dcm_100_efficiency_pt_y_yield_bdt_cut_0.8.root");
     TH2D *efficiency = (TH2D*)f2->Get("Efficiency");
-    TFile *f3 = TFile::Open("/home/shahid/cbmsoft/Cut_optimization/uncut_data/Project/lambda_qa_urqmd.root");
+    TFile *f3 = TFile::Open("/home/shahid/cbmsoft/Cut_optimization/uncut_data/Project/lambda_qa_dcm.root");
     TDirectory* dir1 = (TDirectory*)f3->Get("SimParticles_McLambda");
     TH2D *Mc = (TH2D*)dir1->Get("SimParticles_rapidity_SimParticles_pT_McLambda");
     Mc->SetName("Mc"); Mc->SetTitle("Mc");
@@ -68,6 +68,7 @@ enum { kGaus = 0,
           {
           t->GetEntry(i);
           if ( (pT<pt_bin_up) && (pT>pt_bin_low) && (rapidity >y_bin_low) && (rapidity <y_bin_up) && (xgb_preds>cut) ){
+            //fill h1 with lambda candidates
             h1->Fill(mass);
             if(issignal>0){
             sum_mc+=1;              
@@ -79,6 +80,7 @@ enum { kGaus = 0,
           {
           t1->GetEntry(i);
           if ( (MCpT<pt_bin_up) && (MCpT>pt_bin_low) && (MCrapidity >y_bin_low) && (MCrapidity <y_bin_up) && (MCxgb_preds>cut) & (MCissignal>0) ){
+            //fill h0 with signal only candidates
             h0->Fill(MCmass);
             sum +=1;
             }
@@ -90,7 +92,7 @@ enum { kGaus = 0,
                 j++;
                 Double_t minMassForFit0 = h0->GetMean()-4*(h0->GetRMS());
                 Double_t maxMassForFit0 = h0->GetMean()+4*(h0->GetRMS());              
-
+//signal only fitter creation
                 AliHFInvMassFitter* fitter0 = new AliHFInvMassFitter(h0, minMassForFit0, maxMassForFit0,   AliHFInvMassFitter::ETypeOfBkg::kNoBk, types);
                 fitter0->SetInitialGaussianMean(1.1156);
                 fitter0->SetInitialGaussianSigma(0.001);
@@ -105,7 +107,7 @@ enum { kGaus = 0,
                 Double_t maxMassForFit = 1.2; 
                 
                 TF1 *sig_func0 = fitter0->GetSignalFunc();
-
+//lambda candidates fitter creation
                 AliHFInvMassFitter* fitter = new AliHFInvMassFitter(h1, minMassForFit, maxMassForFit,   AliHFInvMassFitter::ETypeOfBkg::kPol2, types);
                 fitter->SetInitialGaussianMean(sig_func0->GetParameter(1));
                 fitter->SetInitialGaussianSigma(sig_func0->GetParameter(2));
@@ -121,7 +123,7 @@ enum { kGaus = 0,
                   TF1 *bac_func= fitter->GetBackgroundRecalcFunc(); bac_func = PlotBackground(bac_func);
                   TF1 *M_func = fitter->GetMassFunc();M_func = PlotMass(M_func);
                   
-                  //Double_t cov_mat = M_func->GetCovarianceMatrix();
+                  //plotting
                   h1 = PlotHistos(h1);
                   
                   canvas ->Draw();
@@ -186,6 +188,8 @@ enum { kGaus = 0,
                   TLine* line = new TLine (1.08,0 ,1.2 ,0);
                   line -> SetLineColor ( kRed );
                   line->Draw("SAME");
+
+                  //save some of the data
                   y_bin_low1.push_back(y_bin_low);
                   pt_bin_low1.push_back(pt_bin_low);
                   red_chi2.push_back(fitter->GetReducedChiSquare());
@@ -231,7 +235,7 @@ enum { kGaus = 0,
         }
       }
       
-
+//this part is just double checking everything
     canvas->Print ("/home/shahid/cbmsoft/Cut_optimization/uncut_data/Project/pT_rapidity_distribution_XGB_extracted_signal.pdf)","pdf");
     TH2F* h4 = hist2d_pt_y();
     h4->SetTitle("#sigma_{1}+#sigma_{2}");
@@ -299,6 +303,8 @@ enum { kGaus = 0,
     //h7->GetZaxis()->SetRangeUser (0 ,1.2);
     //h7->Draw("colz1");
     //h7->Draw("TEXT SAME");
+    
+    //this function is for creating efficiency plot
     eff_creator(y_bin_low1, pt_bin_low1, yield, yield_error, sim_mc_yield);
     
     auto c8 = new TCanvas("c8","",500,500);
