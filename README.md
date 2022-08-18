@@ -15,7 +15,7 @@ For the installion of the class kindly follow the following steps:
 - `make`
 5. 
 For MAC users
-uncomment line 9 in signal_extraction/src/CMakeList.txt
+uncomment line 9 in the [src/CMakeList.txt](https://git.cbm.gsi.de/sh.khan/signal_extraction/-/blob/master/src/CMakeLists.txt)
 
 ## Usage for the first time
 To use the class, one needs to export it to root as a library
