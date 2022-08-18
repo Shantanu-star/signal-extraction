@@ -13,6 +13,7 @@ For the installion of the class kindly follow the following steps:
 4. Compile and install the class
 - `cmake ./`
 - `make`
+5. 
 For MAC users
 uncomment line 9 in signal_extraction/src/CMakeList.txt
 
