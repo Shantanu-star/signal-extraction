@@ -27,7 +27,7 @@ class AliHFInvMassFitter : public TNamed {
  public:
 
   enum ETypeOfBkg{ kExpo=0, kLin=1, kPol2=2, kNoBk=3, kPow=4, kPowEx=5};
-  enum ETypeOfSgn{ kGaus=0, k2Gaus=1, k2GausSigmaRatioPar=2 };
+  enum ETypeOfSgn{ kGaus=0, k2Gaus=1, k2GausSigmaRatioPar=2, DSCB=3 };
   AliHFInvMassFitter();
   AliHFInvMassFitter(const TH1F* histoToFit, Double_t minvalue, Double_t maxvalue, Int_t fittypeb=kExpo, Int_t fittypes=kGaus);
   ~AliHFInvMassFitter();
@@ -64,6 +64,13 @@ class AliHFInvMassFitter : public TNamed {
   void SetInitialSecondGaussianSigma(Double_t sigma) {fSigmaSgn2Gaus=sigma;}
   void SetInitialFrac2Gaus(Double_t frac) {fFrac2Gaus=frac;}
   void SetInitialRatio2GausSigma(Double_t fracsigma) {fRatio2GausSigma=fracsigma;}
+  
+  //DSCB parameters inclusion
+  void SetInitiala1(Double_t a1) {fa1=a1;}
+  void SetInitialn1(Double_t n1) {fn1=n1;}
+  void SetInitiala2(Double_t a2) {fa2=a2;}
+  void SetInitialn2(Double_t n2) {fn2=n2;}
+  
   void SetFixGaussianMean(Double_t mean){
     SetInitialGaussianMean(mean); 
     fFixedMean=kTRUE;
@@ -86,6 +93,34 @@ class AliHFInvMassFitter : public TNamed {
     fBoundSigma=kTRUE;
     fFitOption="L,E,B";
   }
+  //DSCB 
+  void SetBoundDSCBa1(Double_t a1, Double_t a1LowerLim, Double_t a1UpperLim){
+    SetInitiala1(a1);
+    fa1LowerLim = a1LowerLim;
+    fa1UpperLim = a1UpperLim;
+    fBounda1 = kTRUE;
+  }
+  void SetBoundDSCBn1(Double_t n1, Double_t n1LowerLim, Double_t n1UpperLim){ 
+    SetInitialn1(n1);
+    fn1LowerLim = n1LowerLim;
+    fn1UpperLim = n1UpperLim;
+    fBoundn1 = kTRUE;
+  }
+  void SetBoundDSCBa2(Double_t a2 ,Double_t a2LowerLim, Double_t a2UpperLim){ 
+    SetInitiala2(a2);
+    fa2LowerLim = a2LowerLim;
+    fa2UpperLim = a2UpperLim;
+    fBounda2 = kTRUE;
+  }
+  void SetBoundDSCBn2(Double_t n2, Double_t n2LowerLim, Double_t n2UpperLim){ 
+    SetInitialn2(n2);
+    fn2LowerLim = n2LowerLim;
+    fn2UpperLim = n2UpperLim;
+    fBoundn2 = kTRUE;
+  }
+  
+  
+  
   void SetFixSecondGaussianSigma(Double_t sigma){
     if(fTypeOfFit4Sgn!=k2Gaus) AliFatal("fTypeOfFit4Sgn should be set to k2Gaus to fix ratio between gaussians\n");
     SetInitialSecondGaussianSigma(sigma);
@@ -142,6 +177,7 @@ class AliHFInvMassFitter : public TNamed {
   TF1*     GetMassFunc(){return fTotFunc;}
   TF1*     GetSecondPeakFunc(){return fSecFunc;}
   TF1*     GetReflFunc(){return fRflFunc;}
+  TF1*     GetInitialBackgroundFit(){return fBkgFuncSb;}
   Double_t GetChiSquare() const{
     if(fTotFunc) return fTotFunc->GetChisquare();
     else return -1;
@@ -198,7 +234,7 @@ class AliHFInvMassFitter : public TNamed {
   TF1*	   CreateReflectionFunction(TString fname);
   TF1*	   CreateBackgroundPlusReflectionFunction(TString fname);
   TF1*	   CreateTotalFitFunction(TString fname);
-  Bool_t   PrepareHighPolFit(TF1 *fback);
+  Bool_t   PrepareHighPolFit(TF1 *fback, Double_t integral);
   Double_t BackFitFuncPolHelper(Double_t *x,Double_t *par);
 
   void DrawFit();
@@ -228,6 +264,29 @@ class AliHFInvMassFitter : public TNamed {
   Double_t  fFixedRawYield;        /// initialization for wa yield
   Double_t  fFrac2Gaus;            /// initialization for fraction of 2nd gaussian in case of k2Gaus or k2GausSigmaRatioPar
   Bool_t    fFixedFrac2Gaus;       /// switch for fixed fraction of 2nd gaussian in case of k2Gaus or k2GausSigmaRatioPar
+  //DSCB parameters inclusion
+  Double_t  fa1;                   /// parameter of the left power tail
+  Bool_t    fFixeda1;
+  Bool_t    fBounda1;
+  Double_t  fa1LowerLim;
+  Double_t  fa1UpperLim;
+  Double_t  fn1;                   /// parameter of the left power tail 
+  Bool_t    fFixedn1;
+  Bool_t    fBoundn1;
+  Double_t  fn1LowerLim;
+  Double_t  fn1UpperLim;
+  Double_t  fa2;                   /// parameter of the right power tail
+  Bool_t    fFixeda2;
+  Bool_t    fBounda2;
+  Double_t  fa2LowerLim;
+  Double_t  fa2UpperLim;
+  Double_t  fn2;                   /// parameter of the right power tail
+  Bool_t    fFixedn2;
+  Bool_t    fBoundn2;
+  Double_t  fn2LowerLim;
+  Double_t  fn2UpperLim;
+  
+
   Double_t  fRatio2GausSigma;      /// initialization for ratio between two gaussian sigmas in case of k2GausSigmaRatioPar
   Bool_t    fFixedRatio2GausSigma; /// switch for fixed ratio between two gaussian sigmas in case of k2GausSigmaRatioPar
   Int_t     fNParsSig;             /// fit parameters in signal fit function
@@ -259,6 +318,7 @@ class AliHFInvMassFitter : public TNamed {
   Bool_t    fFixSecWidth;          /// flag to fix the width of the 2nd peak
   TF1*      fSecFunc;              /// fit function for second peak
   TF1*      fTotFunc;              /// total fit function
+  Bool_t    fAcceptValidFit;       /// accept a fit when IsValid() gives true, nevertheless the status code
 
   /// \cond CLASSIMP     
   ClassDef(AliHFInvMassFitter,8); /// class for invariant mass fit
