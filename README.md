@@ -27,5 +27,9 @@ It has a test.cpp file and one can use it to check whether everything has been d
 - `root -l test.cpp`
 
 ## For expert user (good practices)
+### Higher Order Polynomial
 For a specific particle if higher order polynomial option is desired then use the following option because the high order polynomial function is defined differently than the pol2
 - `SetParticlePdgMass(Particle_PDG_mass)`
+
+### Double Sided Crystal Ball function
+For the DSCB signal option try to set bounds in the initial fit and once parameters are found then release the bounds. If the initial fit works but the final fit fails because of the limits on parameters, kindly change them in the 
