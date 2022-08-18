@@ -28,4 +28,4 @@ It has a test.cpp file and one can use it to check whether everything has been d
 
 ## For expert user (good practices)
 For a specific particle if higher order polynomial option is desired then use the following option because the high order polynomial function is defined differently than the pol2
-- `SetParticlePdgMass(1.115683)`
+- `SetParticlePdgMass(Particle_PDG_mass)`
