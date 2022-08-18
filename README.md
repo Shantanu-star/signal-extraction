@@ -13,6 +13,7 @@ For the installion of the class kindly follow the following steps:
 4. Compile and install the class
 - `cmake ./`
 - `make`
+For MAC users
 
 ## Usage
 To use the class, one needs to export it to root as a library
