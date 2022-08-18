@@ -51,11 +51,11 @@ AliHFInvMassFitter::AliHFInvMassFitter() :
   fMinMass(0),
   fMaxMass(5),
   fTypeOfFit4Bkg(kExpo),
-  fPolDegreeBkg(4),
+  fPolDegreeBkg(3),
   fCurPolDegreeBkg(-1),
-  fMassParticle(1.864),
+  fMassParticle(1.115683),
   fTypeOfFit4Sgn(kGaus),
-  fMass(1.865),
+  fMass(1.115683),
   fMassErr(0.),
   fSigmaSgn(0.012),
   fSigmaSgnErr(0.),
@@ -72,6 +72,28 @@ AliHFInvMassFitter::AliHFInvMassFitter() :
   fFixedRawYield(-1.),
   fFrac2Gaus(0.2),
   fFixedFrac2Gaus(kFALSE),
+  //DSCB parameters inclusion
+  fa1(1),
+  fFixeda1(kFALSE),
+  fBounda1(kFALSE),
+  fa1LowerLim(0),
+  fa1UpperLim(100),
+  fn1(1),
+  fFixedn1(kFALSE),
+  fBoundn1(kFALSE),
+  fn1LowerLim(0),
+  fn1UpperLim(1000),
+  fa2(1),
+  fFixeda2(kFALSE),
+  fBounda2(kFALSE),
+  fa2LowerLim(0),
+  fa2UpperLim(100),
+  fn2(1),
+  fFixedn2(kFALSE),
+  fBoundn2(kFALSE),
+  fn2LowerLim(0),
+  fn2UpperLim(1000),
+  
   fRatio2GausSigma(0.),
   fFixedRatio2GausSigma(kFALSE),
   fNParsSig(3),
@@ -102,7 +124,8 @@ AliHFInvMassFitter::AliHFInvMassFitter() :
   fFixSecMass(kFALSE),
   fFixSecWidth(kFALSE),
   fSecFunc(0x0),
-  fTotFunc(0x0)
+  fTotFunc(0x0),
+  fAcceptValidFit(kFALSE)
 {
   /// default constructor
 }
@@ -114,11 +137,11 @@ AliHFInvMassFitter::AliHFInvMassFitter(const TH1F *histoToFit, Double_t minvalue
   fMinMass(minvalue),
   fMaxMass(maxvalue),
   fTypeOfFit4Bkg(fittypeb),
-  fPolDegreeBkg(4),
+  fPolDegreeBkg(3),
   fCurPolDegreeBkg(-1),
-  fMassParticle(1.864),
+  fMassParticle(1.115683),
   fTypeOfFit4Sgn(fittypes),
-  fMass(1.865),
+  fMass(1.115683),
   fMassErr(0.),
   fSigmaSgn(0.012),
   fSigmaSgnErr(0.),
@@ -135,6 +158,28 @@ AliHFInvMassFitter::AliHFInvMassFitter(const TH1F *histoToFit, Double_t minvalue
   fFixedRawYield(-1.),
   fFrac2Gaus(0.2),
   fFixedFrac2Gaus(kFALSE),
+  //DSCB parameters inclusion
+  fa1(1),
+  fFixeda1(kFALSE),
+  fBounda1(kFALSE),
+  fa1LowerLim(0),
+  fa1UpperLim(100),
+  fn1(1),
+  fFixedn1(kFALSE),
+  fBoundn1(kFALSE),
+  fn1LowerLim(0),
+  fn1UpperLim(1000),
+  fa2(1),
+  fFixeda2(kFALSE),
+  fBounda2(kFALSE),
+  fa2LowerLim(0),
+  fa2UpperLim(100),
+  fn2(1),
+  fFixedn2(kFALSE),
+  fBoundn2(kFALSE),
+  fn2LowerLim(0),
+  fn2UpperLim(1000),
+  
   fRatio2GausSigma(0.),
   fFixedRatio2GausSigma(kFALSE),
   fNParsSig(3),
@@ -165,7 +210,8 @@ AliHFInvMassFitter::AliHFInvMassFitter(const TH1F *histoToFit, Double_t minvalue
   fFixSecMass(kFALSE),
   fFixSecWidth(kFALSE),
   fSecFunc(0x0),
-  fTotFunc(0x0)
+  fTotFunc(0x0),
+  fAcceptValidFit(kFALSE)
 {
   /// standard constructor
   fHistoInvMass=(TH1F*)histoToFit->Clone("fHistoInvMass");
@@ -231,6 +277,9 @@ void AliHFInvMassFitter::SetNumberOfParams(){
   case 2:
     fNParsSig=5;
     break;
+    ////DSCB parameters inclusion
+  case 3:
+    fNParsSig=7;
   default:
     AliError("Error in computing fNParsSig: check fTypeOfFit4Sgn");
     break;
@@ -257,20 +306,26 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   fOnlySideBands = kTRUE;
   fBkgFuncSb = CreateBackgroundFitFunction("funcbkgsb",integralHisto);
   Int_t status=-1;
+  Bool_t isFitValid=kFALSE;
   printf("\n--- First fit with only background on the side bands - Exclusion region = %.2f sigma ---\n",fNSigma4SideBands);
   if(fTypeOfFit4Bkg==6){
-    if(PrepareHighPolFit(fBkgFuncSb)){
+    if(PrepareHighPolFit(fBkgFuncSb, integralHisto)){
     //   fHistoInvMass->GetListOfFunctions()->Add(fBkgFuncSb);
     //   fHistoInvMass->GetFunction(fBkgFuncSb->GetName())->SetBit(1<<9,kTRUE);
       status=0;
+      isFitValid=kTRUE;
     }
   }
-    if(fTypeOfFit4Bkg==3){
+      if(fTypeOfFit4Bkg==3){
       status=0;
   }
-  else status=fHistoInvMass->Fit("funcbkgsb",Form("R,%s,+,0",fFitOption.Data()));
+  else{
+    TFitResultPtr resultptr_bkg=fHistoInvMass->Fit("funcbkgsb",Form("R,S,%s,+,0",fFitOption.Data()));
+    status=(Int_t) resultptr_bkg;
+    //isFitValid=resultptr_bkg->IsValid();
+  }
   fBkgFuncSb->SetLineColor(kGray+1);
-  if (status != 0){
+  if ( (status!=0 && !fAcceptValidFit) || (fAcceptValidFit && !isFitValid) ){
     printf("   ---> Failed first fit with only background, minuit status = %d\n",status);
     return 0;
   }
@@ -313,8 +368,12 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
 
   if(doFinalFit){
     printf("\n--- Final fit with signal+background on the full range ---\n");
-    status=fHistoInvMass->Fit("funcmass",Form("R,%s,+,0",fFitOption.Data()));
-    if (status != 0){
+    TFitResultPtr resultptr=fHistoInvMass->Fit("funcmass",Form("R,S,%s,+,0",fFitOption.Data()));
+    //isFitValid = resultptr->IsValid();
+    status = (Int_t) resultptr;
+    printf("[AliHFInvMassFitter] final fit status %d\n",status);
+    printf("[AliHFInvMassFitter] IsValid() = %d\n",isFitValid);
+    if ( (status!=0 && !fAcceptValidFit) || (fAcceptValidFit && !isFitValid) ){
       printf("   ---> Failed fit with signal+background, minuit status = %d\n",status);
       return 0;
     }
@@ -353,7 +412,8 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   }
   fMass=fSigFunc->GetParameter(1);
   fMassErr=fSigFunc->GetParError(1);
-  fSigmaSgn=fSigFunc->GetParameter(2);
+  if ( (fTypeOfFit4Sgn==1) ){ if(fSigFunc->GetParameter(2) >= fSigFunc->GetParameter(4) ) {fSigmaSgn=fSigFunc->GetParameter(2);} if(fSigFunc->GetParameter(2) < fSigFunc->GetParameter(4)){fSigmaSgn=fSigFunc->GetParameter(4);}}
+  else{fSigmaSgn=fSigFunc->GetParameter(2);}
   fSigmaSgnErr=fSigFunc->GetParError(2);
   fTotFunc->SetLineColor(4);
   fRawYield=fTotFunc->GetParameter(fNParsBkg)/fHistoInvMass->GetBinWidth(1);
@@ -535,6 +595,8 @@ TF1* AliHFInvMassFitter::CreateBackgroundFitFunction(TString fname, Double_t int
       funcbkg->SetParameter(j,0);
     }
     funcbkg->SetParameter(0,integral);
+    funcbkg->SetParameter(1,-10);
+    funcbkg->SetParameter(2,5);
     break;
   default:
     AliError(Form("Wrong choice of fTypeOfFit4Bkg (%d)",fTypeOfFit4Bkg));
@@ -613,14 +675,14 @@ TF1* AliHFInvMassFitter::CreateSignalFitFunction(TString fname, Double_t integsi
     funcsig->SetParameter(1,fMass);
     if(fFixedMean) funcsig->FixParameter(1,fMass);
     funcsig->SetParameter(2,fSigmaSgn);
-    funcsig->SetParLimits(2,0.0000001,0.5);
+    funcsig->SetParLimits(2,0.00000001,0.9);
     if(fFixedSigma) funcsig->FixParameter(2,fSigmaSgn);
     funcsig->SetParameter(3,fFrac2Gaus);
     if(fFixedFrac2Gaus) funcsig->FixParameter(3,fFrac2Gaus);
     else funcsig->SetParLimits(3,0.,1.);
     funcsig->SetParameter(4,fSigmaSgn2Gaus);
     if(fFixedSigma2Gaus) funcsig->FixParameter(4,fSigmaSgn2Gaus);
-    else funcsig->SetParLimits(4,0.0000001,0.5);
+    else funcsig->SetParLimits(4,0.00000001,0.9);
     funcsig->SetParNames("SgnInt","Mean","Sigma1","Frac","Sigma2");
   }
   if(fTypeOfFit4Sgn==k2GausSigmaRatioPar){
@@ -639,6 +701,31 @@ TF1* AliHFInvMassFitter::CreateSignalFitFunction(TString fname, Double_t integsi
     else funcsig->SetParLimits(4,0.,20.);
     funcsig->SetParNames("SgnInt","Mean","Sigma1","Frac","RatioSigma12");
   }
+  //DSCB parameters inclusion
+    if(fTypeOfFit4Sgn==DSCB){
+    funcsig->SetParameter(0,integsig);
+    if(fFixedRawYield>-0.1) funcsig->FixParameter(0,fFixedRawYield);
+    funcsig->SetParameter(1,fMass);
+    if(fFixedMean) funcsig->FixParameter(1,fMass);
+    if(fBoundMean) funcsig->SetParLimits(1,fMassLowerLim, fMassUpperLim);
+    funcsig->SetParameter(2,fSigmaSgn);
+    if(fFixedSigma) funcsig->FixParameter(2,fSigmaSgn);
+    if(fBoundSigma) funcsig->SetParLimits(2,fSigmaVar*(1-fParSig), fSigmaVar*(1+fParSig));
+    funcsig->SetParameter(3,fa1);
+    if(fFixeda1) funcsig->FixParameter(3,fa1);
+    if(fBounda1) funcsig->SetParLimits(3,fa1LowerLim, fa1UpperLim);
+    funcsig->SetParameter(4,fn1);
+    if(fFixedn1) funcsig->FixParameter(4,fn1);
+    if(fBoundn1) funcsig->SetParLimits(4,fn1LowerLim, fn1UpperLim);
+    funcsig->SetParameter(5,fa2);
+    if(fFixeda2) funcsig->FixParameter(5,fa2);
+    if(fBounda2) funcsig->SetParLimits(5,fa2LowerLim, fa2UpperLim);
+    funcsig->SetParameter(6,fn2);
+    if(fFixedn2) funcsig->FixParameter(6,fn2);
+    if(fBoundn2) funcsig->SetParLimits(6,fn2LowerLim, fn2UpperLim);
+    funcsig->SetParNames("SgnInt","Mean","Sigma","a1","n1","a2","n2");
+  }
+  
   return funcsig;
 }
 
@@ -653,9 +740,9 @@ TF1* AliHFInvMassFitter::CreateTotalFitFunction(TString fname){
   for(Int_t ipar=0; ipar<fNParsBkg; ipar++){
     ftot->SetParameter(ipar,fBkgFunc->GetParameter(ipar));
     ftot->SetParName(ipar,fBkgFunc->GetParName(ipar));
-    // Double_t parmin,parmax;
-    // fBkgFunc->GetParLimits(ipar,parmin,parmax);
-    // ftot->SetParLimits(ipar,parmin,parmax);
+     Double_t parmin,parmax;
+     fBkgFunc->GetParLimits(ipar,parmin,parmax);
+     ftot->SetParLimits(ipar,parmin,parmax);
   }
   for(Int_t ipar=0; ipar<fNParsSig; ipar++){
     ftot->SetParameter(ipar+fNParsBkg,fSigFunc->GetParameter(ipar));
@@ -824,6 +911,16 @@ Double_t AliHFInvMassFitter::FitFunction4Sgn (Double_t *x, Double_t *par){
     g2=par[3]/TMath::Sqrt(2.*TMath::Pi())/(par[4]*par[2])*TMath::Exp(-(x[0]-par[1])*(x[0]-par[1])/2./(par[4]*par[2])/(par[4]*par[2]));
     sigval=par[0]*(g1+g2);
     break;
+    //DSCB parameters inclusion
+  case 3:
+      if(((x[0]-par[1])/par[2])<-par[3])
+    sigval=par[0]*(TMath::Power(par[4]/par[3], par[4])*TMath::Exp(-par[3]*par[3]/2))*TMath::Power(((par[4]/par[3] - par[3])-((x[0]-par[1])/par[2])), -par[4]);
+  else if(((x[0]-par[1])/par[2])>=-par[3] && ((x[0]-par[1])/par[2])<par[5])
+    sigval=par[0]*TMath::Exp(-((x[0]-par[1])/par[2])*((x[0]-par[1])/par[2])/2);
+  else if(((x[0]-par[1])/par[2])>=par[5])
+    sigval=par[0]*(TMath::Power(par[6]/par[5], par[6])*TMath::Exp(-par[5]*par[5]/2))*TMath::Power(((par[6]/par[5] - par[5])+((x[0]-par[1])/par[2])), -par[6]);
+  else
+    sigval=-1.;
   }
   fRawYieldHelp=par[0]/fHistoInvMass->GetBinWidth(1);
   return sigval;
@@ -983,7 +1080,7 @@ void AliHFInvMassFitter::Significance(Double_t min, Double_t max, Double_t &sign
   return;
 }
 //________________________________________________________________________
-Bool_t AliHFInvMassFitter::PrepareHighPolFit(TF1 *fback){
+Bool_t AliHFInvMassFitter::PrepareHighPolFit(TF1 *fback, Double_t integral){
   /// Perform intermediate fit steps up to fPolDegreeBkg-1
   /// in case of fit with a polynomial with degree > 2 (fTypeOfFit4Bkg=6)
 
@@ -995,14 +1092,17 @@ Bool_t AliHFInvMassFitter::PrepareHighPolFit(TF1 *fback){
   while(fCurPolDegreeBkg<=fPolDegreeBkg){
     funcbkg = new TF1(Form("temp%d",fCurPolDegreeBkg),this,&AliHFInvMassFitter::BackFitFuncPolHelper,fMinMass,fMaxMass,fCurPolDegreeBkg+1,"AliHFInvMassFitter","BackFitFuncPolHelper");
     if(funcPrev){
-      for(Int_t j=0;j<fCurPolDegreeBkg;j++){// now is +1 degree w.r.t. previous fit funct
-	funcbkg->SetParameter(j,funcPrev->GetParameter(j));
+      {// now is +1 degree w.r.t. previous fit funct
+	funcbkg->SetParameter(0,integral);
+  funcbkg->SetParameter(1,-10);
+      funcbkg->SetParameter(2,5);
       }
       delete funcPrev;
     }
     else{
-      funcbkg->SetParameter(0,estimatecent);
-      funcbkg->SetParameter(1,estimateslope);
+      funcbkg->SetParameter(0,integral);
+      funcbkg->SetParameter(1,-10);
+      funcbkg->SetParameter(2,5);
     }
     printf("   ---> Pre-fit of background with pol degree %d ---\n",fCurPolDegreeBkg);
     fHistoInvMass->Fit(funcbkg,"REMN","");
@@ -1041,7 +1141,7 @@ Double_t AliHFInvMassFitter::BackFitFuncPolHelper(Double_t *x,Double_t *par){
     return 0;
   }
   Double_t back=par[0];
-  for(Int_t it=1;it<=fCurPolDegreeBkg;it++){
+  for(Int_t it=2;it<=fCurPolDegreeBkg;it++){
     back+=par[it]*TMath::Power(x[0]-fMassParticle,it)/TMath::Factorial(it);
   }
   return back;
