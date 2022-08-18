@@ -17,7 +17,7 @@ For the installion of the class kindly follow the following steps:
 For MAC users
 uncomment line 9 in signal_extraction/src/CMakeList.txt
 
-## Usage
+## Usage for the first time
 To use the class, one needs to export it to root as a library
 
 - `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/the/path/to/build/src/`
@@ -25,3 +25,7 @@ To use the class, one needs to export it to root as a library
 It has a test.cpp file and one can use it to check whether everything has been done properly
 
 - `root -l test.cpp`
+
+## For expert user (good practices)
+For a specific particle if higher order polynomial option is desired then use the following option because the high order polynomial function is defined differently than the pol2
+- `SetParticlePdgMass(1.115683)`
