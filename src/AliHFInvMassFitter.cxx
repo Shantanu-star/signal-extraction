@@ -23,6 +23,7 @@
 #include <TPaveText.h>
 #include "AliHFInvMassFitter.h"
 #include "AliVertexingHFUtils.h"
+#include <TFile.h>
 
 /// \cond CLASSIMP
 ClassImp(AliHFInvMassFitter);
@@ -96,8 +97,8 @@ AliHFInvMassFitter::AliHFInvMassFitter() :
   
   fRatio2GausSigma(0.),
   fFixedRatio2GausSigma(kFALSE),
-  fNParsSig(3),
-  fNParsBkg(2),
+  fNParsSig(7),
+  fNParsBkg(5),
   fOnlySideBands(kFALSE),
   fNSigma4SideBands(4.),
   fCheckSignalCountsAfterFirstFit(kTRUE),
@@ -182,8 +183,8 @@ AliHFInvMassFitter::AliHFInvMassFitter(const TH1F *histoToFit, Double_t minvalue
   
   fRatio2GausSigma(0.),
   fFixedRatio2GausSigma(kFALSE),
-  fNParsSig(3),
-  fNParsBkg(2),
+  fNParsSig(7),
+  fNParsBkg(5),
   fOnlySideBands(kFALSE),
   fNSigma4SideBands(4.),
   fCheckSignalCountsAfterFirstFit(kTRUE),
@@ -366,6 +367,13 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   }
   fTotFunc = CreateTotalFitFunction("funcmass");
 
+/*  TFile* fileOut = new TFile("/home/shahid/Downloads/fileOut.root", "recreate");
+  fHistoInvMass->Write("histo");
+  fTotFunc->Write("func");
+  fileOut->Close();
+*/  
+  
+  
   if(doFinalFit){
     printf("\n--- Final fit with signal+background on the full range ---\n");
     TFitResultPtr resultptr=fHistoInvMass->Fit("funcmass",Form("R,S,%s,+,0",fFitOption.Data()));
@@ -703,7 +711,7 @@ TF1* AliHFInvMassFitter::CreateSignalFitFunction(TString fname, Double_t integsi
   }
   //DSCB parameters inclusion
     if(fTypeOfFit4Sgn==DSCB){
-    funcsig->SetParameter(0,integsig);
+    funcsig->SetParameter(0,fHistoInvMass->GetBinContent(fHistoInvMass->FindBin(fMassParticle)));
     if(fFixedRawYield>-0.1) funcsig->FixParameter(0,fFixedRawYield);
     funcsig->SetParameter(1,fMass);
     if(fFixedMean) funcsig->FixParameter(1,fMass);
