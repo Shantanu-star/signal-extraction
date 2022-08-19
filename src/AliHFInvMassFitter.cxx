@@ -376,9 +376,11 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   
   if(doFinalFit){
     printf("\n--- Final fit with signal+background on the full range ---\n");
-    TFitResultPtr resultptr=fHistoInvMass->Fit("funcmass",Form("R,S,%s,+,0",fFitOption.Data()));
+    
+    if (fTypeOfFit4Sgn==DSCB){TFitResultPtr resultptr=fHistoInvMass->Fit("funcmass","R,L,M,E,+,0,S"); std::cout<<"DSCB fit"<<std::endl;}
+    else {TFitResultPtr resultptr=fHistoInvMass->Fit("funcmass",Form("R,S,%s,+,0",fFitOption.Data()));status = (Int_t) resultptr;}
     //isFitValid = resultptr->IsValid();
-    status = (Int_t) resultptr;
+    
     printf("[AliHFInvMassFitter] final fit status %d\n",status);
     printf("[AliHFInvMassFitter] IsValid() = %d\n",isFitValid);
     if ( (status!=0 && !fAcceptValidFit) || (fAcceptValidFit && !isFitValid) ){
