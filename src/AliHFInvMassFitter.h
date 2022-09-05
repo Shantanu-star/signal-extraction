@@ -265,7 +265,7 @@ class AliHFInvMassFitter : public TNamed {
   Double_t  fFrac2Gaus;            /// initialization for fraction of 2nd gaussian in case of k2Gaus or k2GausSigmaRatioPar
   Bool_t    fFixedFrac2Gaus;       /// switch for fixed fraction of 2nd gaussian in case of k2Gaus or k2GausSigmaRatioPar
   //DSCB parameters inclusion
-  Double_t  fa1;                   /// parameter of the left power tail
+  Double_t  fa1;                   /// parameter of the left power tail; a1 should be > 0
   Bool_t    fFixeda1;
   Bool_t    fBounda1;
   Double_t  fa1LowerLim;
@@ -275,7 +275,7 @@ class AliHFInvMassFitter : public TNamed {
   Bool_t    fBoundn1;
   Double_t  fn1LowerLim;
   Double_t  fn1UpperLim;
-  Double_t  fa2;                   /// parameter of the right power tail
+  Double_t  fa2;                   /// parameter of the right power tail; a2 should be > 0
   Bool_t    fFixeda2;
   Bool_t    fBounda2;
   Double_t  fa2LowerLim;
