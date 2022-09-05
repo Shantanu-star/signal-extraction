@@ -367,11 +367,11 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   }
   fTotFunc = CreateTotalFitFunction("funcmass");
 
-/*  TFile* fileOut = new TFile("/home/shahid/Downloads/fileOut.root", "recreate");
+  TFile* fileOut = new TFile("/home/shahid/Downloads/fileOut.root", "recreate");
   fHistoInvMass->Write("histo");
   fTotFunc->Write("func");
   fileOut->Close();
-*/  
+  
   
   
   if(doFinalFit){
@@ -392,7 +392,7 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   for(Int_t ipar=0; ipar<fNParsBkg; ipar++){
     fBkgFuncRefit->SetParameter(ipar,fTotFunc->GetParameter(ipar));
     fBkgFuncRefit->SetParError(ipar,fTotFunc->GetParError(ipar));
-  }
+  }//check why signal parameters have zero errors???
   for(Int_t ipar=0; ipar<fNParsSig; ipar++){
     fSigFunc->SetParameter(ipar,fTotFunc->GetParameter(ipar+fNParsBkg));
     fSigFunc->SetParError(ipar,fTotFunc->GetParError(ipar+fNParsBkg));
@@ -422,9 +422,9 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   }
   fMass=fSigFunc->GetParameter(1);
   fMassErr=fSigFunc->GetParError(1);
-  if ( (fTypeOfFit4Sgn==1) ){ if(fSigFunc->GetParameter(2) >= fSigFunc->GetParameter(4) ) {fSigmaSgn=fSigFunc->GetParameter(2);} if(fSigFunc->GetParameter(2) < fSigFunc->GetParameter(4)){fSigmaSgn=fSigFunc->GetParameter(4);}}
-  else{fSigmaSgn=fSigFunc->GetParameter(2);}
-  fSigmaSgnErr=fSigFunc->GetParError(2);
+  if ( (fTypeOfFit4Sgn==1) ){  if(fSigFunc->GetParameter(2) >= fSigFunc->GetParameter(4) ) {fSigmaSgn=fSigFunc->GetParameter(2); fSigmaSgnErr=fSigFunc->GetParError(2);} if(fSigFunc->GetParameter(2) < fSigFunc->GetParameter(4)){fSigmaSgn=fSigFunc->GetParameter(4);fSigmaSgnErr=fSigFunc->GetParError(4);}  }//always choose the bigger sigma to be the main one in case of DG
+  else{fSigmaSgn=fSigFunc->GetParameter(2);fSigmaSgnErr=fSigFunc->GetParError(2);}
+  
   fTotFunc->SetLineColor(4);
   fRawYield=fTotFunc->GetParameter(fNParsBkg)/fHistoInvMass->GetBinWidth(1);
   fRawYieldErr=fTotFunc->GetParError(fNParsBkg)/fHistoInvMass->GetBinWidth(1);
@@ -692,7 +692,7 @@ TF1* AliHFInvMassFitter::CreateSignalFitFunction(TString fname, Double_t integsi
     else funcsig->SetParLimits(3,0.,1.);
     funcsig->SetParameter(4,fSigmaSgn2Gaus);
     if(fFixedSigma2Gaus) funcsig->FixParameter(4,fSigmaSgn2Gaus);
-    else funcsig->SetParLimits(4,0.00000001,0.9);
+    else funcsig->SetParLimits(4,0.000000001,0.9);
     funcsig->SetParNames("SgnInt","Mean","Sigma1","Frac","Sigma2");
   }
   if(fTypeOfFit4Sgn==k2GausSigmaRatioPar){
