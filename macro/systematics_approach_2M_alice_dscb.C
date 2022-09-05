@@ -47,7 +47,7 @@ enum { kGaus = 0,
     
     Float_t mass, pT, rapidity, MCmass, MCpT, MCrapidity, xgb_preds, MCxgb_preds;Int_t issignal, MCissignal; vector<Int_t> bins={500};  vector<Float_t> mu, mu_error, sigma1, sigma1_error, n1, n1_error, a1, a1_error,n2, n2_error, a2, a2_error, back0, back0_error, back1, back1_error,back2, back2_error, back3, back3_error, back4,back4_error,back5,back5_error, bin_content_vector, bin_content_error_vector, bin_content_vector_sim, bin_content_vector_sim_error, bin_content_vector_sigma_method, bin_content_error_vector_sigma_method,bin_content_vector_mis_match_removed,bin_content_error_vector_mis_match_removed, significance,significance_error, raw_yield_only,raw_yield_only_error,cut_value;
     vector<Float_t> cut={0.45 ,0.452 ,0.454 ,0.456 ,0.458 ,0.46 ,0.462 ,0.464 ,0.466 ,0.468 ,0.47 ,0.472 ,0.474 ,0.476 ,0.478 ,0.48 ,0.482 ,0.484 ,0.486 ,0.488 ,0.49 ,0.492 ,0.494 ,0.496 ,0.498 ,0.5 ,0.502 ,0.504 ,0.506 ,0.508 ,0.51 ,0.512 ,0.514 ,0.516 ,0.518 ,0.52 ,0.522 ,0.524 ,0.526 ,0.528 ,0.53 ,0.532 ,0.534 ,0.536 ,0.538 ,0.54 ,0.542 ,0.544 ,0.546 ,0.548 ,0.55 ,0.552 ,0.554 ,0.556 ,0.558 ,0.56 ,0.562 ,0.564 ,0.566 ,0.568 ,0.57 ,0.572 ,0.574 ,0.576 ,0.578 ,0.58 ,0.582 ,0.584 ,0.586 ,0.588 ,0.59 ,0.592 ,0.594 ,0.596 ,0.598 ,0.6 ,0.602 ,0.604 ,0.606 ,0.608 ,0.61 ,0.612 ,0.614 ,0.616 ,0.618 ,0.62 ,0.622 ,0.624 ,0.626 ,0.628 ,0.63 ,0.632 ,0.634 ,0.636 ,0.638 ,0.64 ,0.642 ,0.644 ,0.646 ,0.648 ,0.65 ,0.652 ,0.654 ,0.656 ,0.658 ,0.66 ,0.662 ,0.664 ,0.666 ,0.668 ,0.67 ,0.672 ,0.674 ,0.676 ,0.678 ,0.68 ,0.682 ,0.684 ,0.686 ,0.688 ,0.69 ,0.692 ,0.694 ,0.696 ,0.698 ,0.7 ,0.702 ,0.704 ,0.706 ,0.708 ,0.71 ,0.712 ,0.714 ,0.716 ,0.718 ,0.72 ,0.722 ,0.724 ,0.726 ,0.728 ,0.73 ,0.732 ,0.734 ,0.736 ,0.738 ,0.74 ,0.742 ,0.744 ,0.746 ,0.748 ,0.75 ,0.752 ,0.754 ,0.756 ,0.758 ,0.76 ,0.762 ,0.764 ,0.766 ,0.768 ,0.77 ,0.772 ,0.774 ,0.776 ,0.778 ,0.78 ,0.782 ,0.784 ,0.786 ,0.788 ,0.79 ,0.792 ,0.794 ,0.796 ,0.798 ,0.8 ,0.802 ,0.804 ,0.806 ,0.808 ,0.81 ,0.812 ,0.814 ,0.816 ,0.818 ,0.82 ,0.822 ,0.824 ,0.826 ,0.828 ,0.83 ,0.832 ,0.834 ,0.836 ,0.838 ,0.84 ,0.842 ,0.844 ,0.846 ,0.848 ,0.85 ,0.852 ,0.854 ,0.856 ,0.858 ,0.86 ,0.862 ,0.864 ,0.866 ,0.868 ,0.87 ,0.872 ,0.874 ,0.876 ,0.878 ,0.88 ,0.882 ,0.884 ,0.886 ,0.888 ,0.89 ,0.892 ,0.894 ,0.896 ,0.898 ,0.9 ,0.902 ,0.904 ,0.906 ,0.908 ,0.91 ,0.912 ,0.914 ,0.916 ,0.918 ,0.92 ,0.922 ,0.924 ,0.926 ,0.928 ,0.93 ,0.932 ,0.934 ,0.936 ,0.938 ,0.94 ,0.942 ,0.944 ,0.946 ,0.948 ,0.95 ,0.952 ,0.954 ,0.956 ,0.958 ,0.96 ,0.962 ,0.964 ,0.966 ,0.968 ,0.97 ,0.972 ,0.974 ,0.976 ,0.978 ,0.98  };
-    vector<Float_t> initial_mass={25}; vector<Float_t> final_mass={67};Double_t sigma_range = 4.5;Double_t sigma_for_yield = 11;Int_t sigma_sides=11; Int_t back_pol_degree=4;
+    vector<Float_t> initial_mass={25}; vector<Float_t> final_mass={67};Double_t sigma_range = 4.5;Double_t sigma_for_yield = 11;Int_t sigma_sides=11; Int_t back_pol_degree=4;Int_t sigma_for_yield0 = 3;
     
     t->SetBranchAddress("mass", &mass);t->SetBranchAddress("pT",&pT);t->SetBranchAddress("rapidity",&rapidity);t->SetBranchAddress("BDT_score",&xgb_preds);t->SetBranchAddress("issignal",&issignal);
     t1->SetBranchAddress("pT",&MCpT);t1->SetBranchAddress("rapidity",&MCrapidity);t1->SetBranchAddress("mass", &MCmass);t1->SetBranchAddress("BDT_score", &MCxgb_preds);t1->SetBranchAddress("issignal", &MCissignal);
@@ -122,8 +122,8 @@ enum { kGaus = 0,
                 Bool_t ok = fitter_mc_signal_DSCB->MassFitter(kFALSE);
                 
                 //DG fit on MC data signal only
-                AliHFInvMassFitter* fitter_mc_signal_DG = new AliHFInvMassFitter(h01, minMassForFit0, maxMassForFit0,   AliHFInvMassFitter::ETypeOfBkg::kNoBk, AliHFInvMassFitter::ETypeOfSgn::k2Gaus);
-                fitter_mc_signal_DG->SetInitialGaussianMean(1.1156);                                fitter_mc_signal_DG->SetInitialGaussianSigma(0.05);
+                AliHFInvMassFitter* fitter_mc_signal_DG = new AliHFInvMassFitter(MC_data_signal, minMassForFit0, maxMassForFit0,   AliHFInvMassFitter::ETypeOfBkg::kNoBk, AliHFInvMassFitter::ETypeOfSgn::k2Gaus);
+                fitter_mc_signal_DG->SetBoundGaussianMean(1.11567,1.113,1.119);                                fitter_mc_signal_DG->SetInitialGaussianSigma(0.05);
                 fitter_mc_signal_DG->SetInitialFrac2Gaus(0.2);                                      fitter_mc_signal_DG->SetInitialSecondGaussianSigma(0.0009);
                 Bool_t ok_DG = fitter_mc_signal_DG->MassFitter(kFALSE);
                 if (ok) {
@@ -132,43 +132,58 @@ enum { kGaus = 0,
                 TF1 *sig_func_MC_DG = fitter_mc_signal_DG->GetSignalFunc(); sig_func_MC_DG = PlotSignal(sig_func_MC_DG);
                
                 //Real data signal only fit with DSCB
-                AliHFInvMassFitter* fitter0 = new AliHFInvMassFitter(real_data_signal, minMassForFit0, maxMassForFit0,   AliHFInvMassFitter::ETypeOfBkg::kNoBk, types);               
-                fitter0->SetInitialGaussianMean(sig_func_MC_DSCB->GetParameter(1));            fitter0->SetInitialGaussianSigma(sig_func_MC_DSCB->GetParameter(2));
-                fitter0->SetInitiala1(sig_func_MC_DSCB->GetParameter(3));                     fitter0->SetInitialn1(sig_func_MC_DSCB->GetParameter(4));
-                fitter0->SetInitiala2(sig_func_MC_DSCB->GetParameter(5));                     fitter0->SetInitialn2(sig_func_MC_DSCB->GetParameter(6));
+                AliHFInvMassFitter* fitter_real_data_sgnl_DSCB = new AliHFInvMassFitter(real_data_signal, minMassForFit0, maxMassForFit0,   AliHFInvMassFitter::ETypeOfBkg::kNoBk, types);               
+                fitter_real_data_sgnl_DSCB->SetInitialGaussianMean(sig_func_MC_DSCB->GetParameter(1));            
+                fitter_real_data_sgnl_DSCB->SetInitialGaussianSigma(sig_func_MC_DSCB->GetParameter(2));
+                fitter_real_data_sgnl_DSCB->SetInitiala1(sig_func_MC_DSCB->GetParameter(3));                     
+                fitter_real_data_sgnl_DSCB->SetInitialn1(sig_func_MC_DSCB->GetParameter(4));
+                fitter_real_data_sgnl_DSCB->SetInitiala2(sig_func_MC_DSCB->GetParameter(5));                     
+                fitter_real_data_sgnl_DSCB->SetInitialn2(sig_func_MC_DSCB->GetParameter(6));
+                fitter_real_data_sgnl_DSCB->SetParticlePdgMass(1.115683); fitter_real_data_sgnl_DSCB->SetUseLikelihoodFit();
                
-                fitter0->SetParticlePdgMass(1.115683); fitter0->SetUseLikelihoodFit();
-               
-                Bool_t ok11 = fitter0->MassFitter(kFALSE);
-                TF1 *sig_func_real_data = fitter0->GetSignalFunc(); sig_func_real_data = PlotSignal(sig_func_real_data);
-                 
-                 Double_t signal_sig, signal_errsig, signal_s, signal_errs, signal_b, signal_errb;
-                  fitter0->Signal(sigma_for_yield,signal_s,signal_errs);
-                  fitter0->Background(sigma_for_yield,signal_b,signal_errb);
-                  fitter0->Significance(sigma_for_yield,signal_sig,signal_errsig);
+                Bool_t ok11 = fitter_real_data_sgnl_DSCB->MassFitter(kFALSE);
+                TF1 *sig_func_real_data = fitter_real_data_sgnl_DSCB->GetSignalFunc(); sig_func_real_data = PlotSignal(sig_func_real_data);//signal func only
+                Double_t signal_s, signal_errs;
+                fitter_real_data_sgnl_DSCB->Signal(sigma_for_yield,signal_s,signal_errs);
+                
+                //Real data signal only fit with DG
+                AliHFInvMassFitter* fitter_real_sgnl_DG = new AliHFInvMassFitter(real_data_signal, minMassForFit0, maxMassForFit0,   AliHFInvMassFitter::ETypeOfBkg::kNoBk, AliHFInvMassFitter::ETypeOfSgn::k2Gaus);
+                fitter_real_sgnl_DG->SetInitialGaussianMean(sig_func_MC_DG->GetParameter(1));                                
+                fitter_real_sgnl_DG->SetInitialGaussianSigma(sig_func_MC_DG->GetParameter(2));
+                fitter_real_sgnl_DG->SetInitialFrac2Gaus(sig_func_MC_DG->GetParameter(3));                                      
+                fitter_real_sgnl_DG->SetInitialSecondGaussianSigma(sig_func_MC_DG->GetParameter(4));
+                Bool_t ok_DG_real_sgnal = fitter_real_sgnl_DG->MassFitter(kFALSE);
+                
+                TF1 *sig_func_real_data_DG = fitter_real_sgnl_DG->GetSignalFunc(); sig_func_real_data_DG = PlotBackground(sig_func_real_data_DG); 
+                Double_t signal_s_DG, signal_errs_DG;
+                fitter_real_sgnl_DG->Signal(sigma_for_yield0,signal_s_DG,signal_errs_DG);
+                
 ///*               
                 canvas0->Draw();                canvas0->Clear();
                 TPad* pad0 = CreatePad1();                pad0 -> Clear();                pad0 -> SetLogy();
                 real_data_signal=PlotHistos(real_data_signal);
                 real_data_signal->Draw("pe,X0");
+                sig_func_real_data_DG->Draw("same");
                 sig_func_real_data->Draw("same");
                 auto latex0 = new TLatex ();
                 latex0 -> SetNDC ();                latex0 -> SetTextSize (0.03);
+                latex0 -> DrawLatex (0.5 ,0.6, Form(  "#color[4]{DG Yield/MC in %d#sigma = %0.3f#pm%0.3f}",sigma_for_yield0 ,(signal_s_DG)/(sum_mc) ,(  (signal_s_DG)/ (sum_mc)   )*(TMath::Sqrt( (signal_errs_DG/signal_s_DG )*(signal_errs_DG/signal_s_DG ) + (TMath::Sqrt(sum_mc)/sum_mc)*(TMath::Sqrt(sum_mc)/sum_mc) ))    ));
                 latex0 -> DrawLatex (0.5 ,0.55, Form(  "yield = in %0.1f #sigma %0.1f#pm %0.1f ; MC %0.2f",sigma_for_yield ,signal_s, signal_errs, sum_mc   ));
                 latex0 -> DrawLatex (0.5 ,0.52, Form(  "Yield/MC = %0.3f#pm%0.3f", (signal_s)/(sum_mc) ,(  (signal_s)/ (sum_mc)   )*(TMath::Sqrt( (signal_errs/signal_s )*(signal_errs/signal_s ) + (TMath::Sqrt(sum_mc)/sum_mc)*(TMath::Sqrt(sum_mc)/sum_mc) ))    ));
                 latex0 -> DrawLatex (0.5 ,0.45, Form("#sigma = %0.4f #pm %0.5f; ",sig_func_real_data->GetParameter(2),sig_func_real_data->GetParError(2)));
                 latex0 -> DrawLatex (0.5 ,0.4, Form("#mu = %0.4f #pm %0.5f;", sig_func_real_data->GetParameter(1),sig_func_real_data->GetParError(1)));
-                latex0 -> DrawLatex (0.5 ,0.35, Form("#chi^{2}_{red} = %0.3f ", fitter0->GetReducedChiSquare()));
+                latex0 -> DrawLatex (0.5 ,0.35, Form("#chi^{2}_{red} = %0.3f ", fitter_real_data_sgnl_DSCB->GetReducedChiSquare()));
                 latex0 -> DrawLatex (0.5 ,0.3, Form("URQMD signal only DSCB fit "));
                 latex0->Draw("same");
-                TLine* line_signal_select_low = new TLine (sig_func_real_data->GetParameter(1)-sigma_for_yield* fitter0->GetSigma(),0 ,sig_func_real_data->GetParameter(1)-sigma_for_yield* fitter0->GetSigma() ,60000);  line_signal_select_low -> SetLineColor ( kYellow );    line_signal_select_low -> SetLineWidth(2);
-                  TLine* line_signal_select_high = new TLine (sig_func_real_data->GetParameter(1)+sigma_for_yield* fitter0->GetSigma(),0 ,sig_func_real_data->GetParameter(1)+sigma_for_yield* fitter0->GetSigma() ,60000);  line_signal_select_high -> SetLineColor ( kYellow );    line_signal_select_high -> SetLineWidth(2);
+                TLine* line_signal_select_low = new TLine (sig_func_real_data->GetParameter(1)-sigma_for_yield* fitter_real_data_sgnl_DSCB->GetSigma(),0 ,sig_func_real_data->GetParameter(1)-sigma_for_yield* fitter_real_data_sgnl_DSCB->GetSigma() ,60000);  line_signal_select_low -> SetLineColor ( kYellow );    line_signal_select_low -> SetLineWidth(2);
+                  TLine* line_signal_select_high = new TLine (sig_func_real_data->GetParameter(1)+sigma_for_yield* fitter_real_data_sgnl_DSCB->GetSigma(),0 ,sig_func_real_data->GetParameter(1)+sigma_for_yield* fitter_real_data_sgnl_DSCB->GetSigma() ,60000);  line_signal_select_high -> SetLineColor ( kYellow );    line_signal_select_high -> SetLineWidth(2);
                 line_signal_select_low->Draw("same");
                 line_signal_select_high->Draw("same");
                 TLegend* legend_signal_only = new TLegend(0.5,0.7,0.8,0.85);
                 legend_signal_only->SetTextSize(0.023);
                 legend_signal_only->AddEntry(real_data_signal,"#Lambda hyperon signal only","pe,X0");
                 legend_signal_only->AddEntry(sig_func_real_data,"DSCB","l");
+                legend_signal_only->AddEntry(sig_func_real_data_DG,"DG","l");
                 legend_signal_only->Draw("same");  
                 
                 canvas0->cd();
@@ -227,7 +242,7 @@ enum { kGaus = 0,
                 TF1 *sig_back = fitter_back->GetSignalFunc(); sig_back = PlotSignal(sig_back);
                 TF1 *back_bac_func= fitter_back->GetBackgroundRecalcFunc(); back_bac_func = PlotBackground(back_bac_func);
                 TF1 *back_M_func = fitter_back->GetMassFunc();back_M_func = PlotMass(back_M_func);
-                Int_t sigma_for_yield0 = 3;
+                
                 Double_t  back_s, back_errs;
                 fitter_back->Signal(sigma_for_yield0,back_s,back_errs);
                 real_data_bac->GetYaxis()->SetRangeUser(0, 1.06*real_data_bac->GetBinContent(real_data_bac->FindBin(1.11567)));  
@@ -248,8 +263,8 @@ enum { kGaus = 0,
                 latex00 -> DrawLatex (0.5 ,0.35, Form("#mu = %0.4f #pm %0.5f;", sig_back->GetParameter(1),sig_back->GetParError(1)));
                 latex00 -> DrawLatex (0.5 ,0.3, Form("#chi^{2}_{red} = %0.3f ", fitter_back->GetReducedChiSquare()));
                 latex00->Draw("same");
-                TLine* line_mis_match_low = new TLine (sig_func->GetParameter(1)-sigma_sides* fitter0->GetSigma(),0 ,sig_func->GetParameter(1)-sigma_sides* fitter0->GetSigma() ,60000);  line_mis_match_low -> SetLineColor ( kRed );    line_mis_match_low -> SetLineWidth(2);
-                  TLine* line_mis_match_high = new TLine (sig_func->GetParameter(1)+sigma_sides* fitter0->GetSigma(),0 ,sig_func->GetParameter(1)+sigma_sides* fitter0->GetSigma() ,60000);  line_mis_match_high -> SetLineColor ( kRed );    line_mis_match_high -> SetLineWidth(2);
+                TLine* line_mis_match_low = new TLine (sig_func->GetParameter(1)-sigma_sides* fitter_real_data_sgnl_DSCB->GetSigma(),0 ,sig_func->GetParameter(1)-sigma_sides* fitter_real_data_sgnl_DSCB->GetSigma() ,60000);  line_mis_match_low -> SetLineColor ( kRed );    line_mis_match_low -> SetLineWidth(2);
+                  TLine* line_mis_match_high = new TLine (sig_func->GetParameter(1)+sigma_sides* fitter_real_data_sgnl_DSCB->GetSigma(),0 ,sig_func->GetParameter(1)+sigma_sides* fitter_real_data_sgnl_DSCB->GetSigma() ,60000);  line_mis_match_high -> SetLineColor ( kRed );    line_mis_match_high -> SetLineWidth(2);
                   line_mis_match_low->Draw("same");
                   line_mis_match_high->Draw("same");
                   TLine* line_mis_match_low1 = new TLine (sig_back->GetParameter(1)-sigma_for_yield0* fitter_back->GetSigma(),0 ,sig_back->GetParameter(1)-sigma_for_yield0* fitter_back->GetSigma() ,60000);  line_mis_match_low1 -> SetLineColor ( kGreen );    line_mis_match_low -> SetLineWidth(2);
@@ -288,8 +303,8 @@ enum { kGaus = 0,
                   
                   initial_bac->Draw("same");  initial_bac_extend->Draw("same");
                   
-                  TLine* line = new TLine (sig_func_MC_DSCB->GetParameter(1)-sigma_sides* fitter0->GetSigma(),0 ,sig_func_MC_DSCB->GetParameter(1)-sigma_sides* fitter0->GetSigma() ,60000);  line -> SetLineColor ( kRed );    line -> SetLineWidth(2);
-                  TLine* line1 = new TLine (sig_func_MC_DSCB->GetParameter(1)+sigma_sides* fitter0->GetSigma(),0 ,sig_func_MC_DSCB->GetParameter(1)+sigma_sides* fitter0->GetSigma() ,60000);  line1 -> SetLineColor ( kRed );    line1 -> SetLineWidth(2);
+                  TLine* line = new TLine (sig_func_MC_DSCB->GetParameter(1)-sigma_sides* fitter_real_data_sgnl_DSCB->GetSigma(),0 ,sig_func_MC_DSCB->GetParameter(1)-sigma_sides* fitter_real_data_sgnl_DSCB->GetSigma() ,60000);  line -> SetLineColor ( kRed );    line -> SetLineWidth(2);
+                  TLine* line1 = new TLine (sig_func_MC_DSCB->GetParameter(1)+sigma_sides* fitter_real_data_sgnl_DSCB->GetSigma(),0 ,sig_func_MC_DSCB->GetParameter(1)+sigma_sides* fitter_real_data_sgnl_DSCB->GetSigma() ,60000);  line1 -> SetLineColor ( kRed );    line1 -> SetLineWidth(2);
                   line->Draw("same");
                   line1->Draw("same");
                   TLine* line0 = new TLine (sig_func->GetParameter(1)-sigma_for_yield* fitter->GetSigma(),0 ,sig_func->GetParameter(1)-sigma_for_yield* fitter->GetSigma() ,60000);  line0 -> SetLineColor ( kGreen );    line0 -> SetLineWidth(2);
