@@ -15,27 +15,55 @@ using namespace std;
 #endif
 
 
-TH1F* PlotHistos(TH1F* mc)
+template<typename h>
+auto PlotHistos(h hist)
 {
-  mc->SetMarkerColor(kBlack);
-  mc->SetMarkerSize(0.4);
-  mc->SetMarkerStyle(8);
-  mc->SetStats(0);
-  mc->SetTitleSize(0.05);
-  mc->SetYTitle("log (counts)");
-  mc->GetYaxis()->CenterTitle();
-  mc->GetYaxis()->SetTitleOffset(0.7);
-  mc->GetYaxis()->SetLabelSize(0.05);
-  mc->GetYaxis()->SetTitleSize(0.06);
-  mc->GetXaxis()->SetTitleSize(0.05);
-  //mc->GetXaxis()->SetRangeUser(1.105, 1.13);
-  mc->GetXaxis()->SetTitleOffset(1.2);
-  mc->GetXaxis()->SetLabelSize(0.05);
-  mc->GetXaxis()->SetTitle("Mass (GeV/c^{2})");
-  mc->GetXaxis()->CenterTitle();
+  hist->SetMarkerColor(kBlack);
+  hist->SetMarkerSize(0.4);
+  hist->SetMarkerStyle(8);
+  hist->SetStats(0);
+  hist->SetTitleSize(0.05);
+  hist->SetYTitle("counts");
+  hist->GetYaxis()->CenterTitle();
+  hist->GetYaxis()->SetMaxDigits(3);
+  hist->GetYaxis()->SetTitleOffset(0.7);
+  hist->GetYaxis()->SetLabelSize(0.05);
+  hist->GetYaxis()->SetTitleSize(0.06);
+  hist->GetXaxis()->SetTitleSize(0.05);
+  //hist->GetXaxis()->SetRangeUser(1.105, 1.13);
+  hist->GetXaxis()->SetTitleOffset(1.2);
+  hist->GetXaxis()->SetLabelSize(0.05);
+  hist->GetXaxis()->SetTitle("Mass (GeV/c^{2})");
+  hist->GetXaxis()->CenterTitle();
   
-//  mc->GetYaxis()->SetRangeUser(0, 3000);
-  return mc;
+//  hist->GetYaxis()->SetRangeUser(0, 3000);
+  return hist;
+}
+
+template<typename h>
+auto dif_hist(h hist) 
+{
+    hist -> SetLineWidth(1);
+    hist->SetMarkerColor(kBlack);
+    hist->SetMarkerStyle(8);
+    hist -> SetMarkerSize(0.1);
+    hist -> SetStats (0);
+    hist -> GetXaxis() -> SetTitle("Mass (GeV/c^{2})");
+    hist -> SetTitle ("");
+    hist -> GetXaxis () -> SetLabelSize (0.1);
+    hist -> GetXaxis()  -> CenterTitle();
+    hist -> GetXaxis () -> SetTitleSize (0.15);
+    hist -> GetYaxis () -> SetLabelSize (0.1);
+    hist -> GetYaxis () -> SetTitleSize (0.1);
+    hist -> GetXaxis () -> SetTitleOffset (1.1);
+    hist -> GetYaxis () -> SetTitleOffset (0.3);
+    //ratio . GetYaxis ()-> SetTitle (" Data /MC");
+    //207,512 divisions
+    hist -> GetYaxis ()-> SetNdivisions (104);
+    hist->SetLineColor(kBlack);
+    hist->SetYTitle("(d-f)/#Deltad");
+    //hist -> GetXaxis () -> SetRangeUser(1.105,1.13);
+    return hist;
 }
 
 TF1* PlotSignal(TF1* sig_func)
@@ -44,6 +72,7 @@ TF1* PlotSignal(TF1* sig_func)
   sig_func->SetLineColor(kGreen);
   sig_func->SetLineStyle(2);
   sig_func->SetLineWidth(4);
+  sig_func->SetLineWidth(2);
   return sig_func;
   }
 
@@ -75,7 +104,7 @@ TCanvas* CreateCanvas(TString name)
   
 TPad* CreatePad1()
   { TPad* pad1 = new TPad (" pad1 "," pad1 " ,0 ,0.3 ,1 ,1);
-    pad1 -> SetBottomMargin (0);
+    pad1 -> SetBottomMargin (0.01);
     pad1 -> SetLeftMargin (0.15);
     //pad1 -> SetLogy();
     pad1 -> Draw ();
@@ -85,7 +114,7 @@ TPad* CreatePad1()
  TPad* CreatePad2()
  {
    TPad* pad2 = new TPad (" pad2 "," pad2 " ,0 ,0.05 ,1 ,0.3);
-   pad2 -> SetGrid();
+   //pad2 -> SetGrid();
    pad2 -> SetBottomMargin (0.5);
    pad2 -> SetLeftMargin (0.15);
    pad2 -> Draw ();
@@ -126,28 +155,6 @@ TH2F* hist2d_pt_y()
 }
 
 
-TH1F* dif_hist(TH1F* h3) 
-{
-    h3 -> SetLineWidth(3);
-    h3 -> SetStats (0);
-    h3 -> GetXaxis() -> SetTitle("Mass (GeV/c^{2})");
-    h3 -> SetTitle ("");
-    h3 -> GetXaxis () -> SetLabelSize (0.15);
-    h3 -> GetXaxis() -> CenterTitle();
-    h3 -> GetXaxis () -> SetTitleSize (0.15);
-    h3 -> GetYaxis () -> SetLabelSize (0.15);
-    h3 -> GetYaxis () -> SetTitleSize (0.15);
-    h3 -> GetXaxis () -> SetTitleOffset (1.1);
-    h3 -> GetYaxis () -> SetTitleOffset (0.25);
-    //ratio . GetYaxis ()-> SetTitle (" Data /MC");
-    //207,512 divisions
-    h3 -> GetYaxis ()-> SetNdivisions (104);
-    h3->SetLineColor(kBlack);
-    h3->SetYTitle("(d-f)/#Deltad");
-    //h3 -> GetXaxis () -> SetRangeUser(1.105,1.13);
-    return h3;
-}
-
 
 void ratio_plot_hists(TH1F* h1, TF1* func, Int_t &bins, Double_t min_mass, Double_t max_mass)
 {
@@ -161,9 +168,17 @@ void ratio_plot_hists(TH1F* h1, TF1* func, Int_t &bins, Double_t min_mass, Doubl
     if (h1->GetBinError(i) > 0){
       diff_hist->SetBinContent(i,(t_value-f_value)/h1->GetBinError(i));}
   }
-  diff_hist = dif_hist(diff_hist);
+  TH1F* clone =(TH1F*) h1->Clone(); clone->Sumw2();
+  clone->Divide(func_hist);
+  clone->GetYaxis()->SetRangeUser(0.8,1.2);
+  clone = dif_hist(clone);
+  clone->SetYTitle("ratio = data/fit");
+/*diff_hist = dif_hist(diff_hist);
   diff_hist->Draw();
   TLine* line = new TLine (min_mass,0 ,max_mass ,0);
+*/
+  clone->Draw();
+  TLine* line = new TLine (min_mass,1 ,max_mass ,1);
   line -> SetLineColor ( kRed );
   line->Draw("SAME");
   delete func_hist, diff_hist;
@@ -223,32 +238,6 @@ void eff_creator(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low1, ve
   ff->Close();
 }
 
-//Double gaussian TF1 creator
-   Double_t double_gaus(Double_t *x, Double_t *par)
-{
-   Double_t f1 = par[0]*((1.-par[3])/TMath::Sqrt(2.*TMath::Pi())/par[2]*TMath::Exp(-(x[0]-par[1])*(x[0]-par[1])/2./par[2]/par[2]));
-   Double_t f2 = par[0]*(par[3]/TMath::Sqrt(2.*TMath::Pi())/par[4]*TMath::Exp(-(x[0]-par[1])*(x[0]-par[1])/2./par[4]/par[4]));
-   Double_t f3=(f1+f2);
-   return f3;
-}
-
-   Double_t gaus1_func(Double_t *x, Double_t *par)
-{
-   Double_t f1 = par[0]*((1.-par[3])/TMath::Sqrt(2.*TMath::Pi())/par[2]*TMath::Exp(-(x[0]-par[1])*(x[0]-par[1])/2./par[2]/par[2]));
-   return f1;
-}
-
-   Double_t gaus2_func(Double_t *x, Double_t *par)
-{
-   Double_t f2 = par[0]*(par[3]/TMath::Sqrt(2.*TMath::Pi())/par[4]*TMath::Exp(-(x[0]-par[1])*(x[0]-par[1])/2./par[4]/par[4]));
-   return f2;
-}
-
-void dcm_efficeincy_creator(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low1, vector<Double_t> &sim_mc_yield)
-{
-
-}
-
 
 
 TH2F* Divide2DHisto(const TH2F* h1, const TH2F* h2, const TString& name) {
@@ -286,7 +275,7 @@ TH2F* eff_creator_new(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low
   
   TH2F* recons_sim = new TH2F("recons_sim", "recons_sim", 10,0,3,10,0,3);
   
-  TH2F* recons_sim_bdt0 = new TH2F("recons_sim_bdt0", "recons_sim_bdt0", 10,0,3,10,0,3);
+  //TH2F* recons_sim_bdt0 = new TH2F("recons_sim_bdt0", "recons_sim_bdt0", 10,0,3,10,0,3);
     
   for (int i=0;i<100;i++)
   {
@@ -296,7 +285,7 @@ TH2F* eff_creator_new(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low
     Double_t pT_bin = int((pT+0.1)/0.3 + 1);
     recons_data->SetBinContent(y_bin, pT_bin, yield[i]);           recons_data->SetBinError(y_bin, pT_bin,yield_error[i]);
     recons_sim->SetBinContent(y_bin,pT_bin,sim_mc_yield[i]);
-    recons_sim_bdt0->SetBinContent(y_bin,pT_bin,pt_y_yield_bdt_0[i]);//was added if we want ML efficiency correction
+    //recons_sim_bdt0->SetBinContent(y_bin,pT_bin,pt_y_yield_bdt_0[i]);//was added if we want ML efficiency correction
     recons_data_mc->SetBinContent(y_bin,pT_bin,mc_yield_data[i]);
   }
   //auto eff = Divide2DHisto(recons_sim, Mc_sim, "eff");
@@ -313,7 +302,7 @@ TH2F* eff_creator_new(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low
   {
   recons_clone->Divide(Mc_sim_data);
   }
-  delete recons_sim, recons_sim_clone, recons_data, recons_sim_bdt0, recons_data_mc;
+  delete recons_sim, recons_sim_clone, recons_data, recons_data_mc;
   return recons_clone;  
   
   
@@ -363,7 +352,7 @@ TH2F* eff_creator_sim(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low
 
 TH1F* corrected_yield_hist(vector<Float_t> &bin_content_vector, double range_min,double range_max )
 {
-    TH1F* hist_corr_yield = new TH1F("hist_corr_yield","",bin_content_vector.size(),range_min,range_max);hist_corr_yield->SetTitle("pT [0.3,0.6] , y_{LAB} [1.2,1.5]");
+    TH1F* hist_corr_yield = new TH1F("hist_corr_yield","",bin_content_vector.size(),range_min,range_max);
       //hist_corr_yield->GetXaxis()->SetTitle("Corrected yield");
     hist_corr_yield->SetYTitle("Counts");
       for (int i=0;i<bin_content_vector.size();i++)
@@ -374,26 +363,110 @@ TH1F* corrected_yield_hist(vector<Float_t> &bin_content_vector, double range_min
 }
 
 
-auto bdt_vs_corrected_yield(vector<Float_t> &bin_content_vector, vector<Float_t> &cut_value,vector<Float_t> &bin_content_error_vector)
+
+TGraphMultiErrors* bdt_vs_corrected_yield
+(vector<Float_t> &bin_content_vector, vector<Float_t> &cut_value,vector<Float_t> &bin_content_error_vector, Float_t &opt_bdt_min, Float_t &opt_bdt_max)
 {
   Double_t x[bin_content_vector.size()];             Double_t y[bin_content_vector.size()];          Double_t exl[bin_content_vector.size()];          Double_t exh[bin_content_vector.size()];   Double_t eylstat[bin_content_vector.size()];       Double_t eyhstat[bin_content_vector.size()]; Double_t eylsys[bin_content_vector.size()];Double_t eyhsys[bin_content_vector.size()];   
    for (int i=0;i<=bin_content_vector.size();i++)
    {
      x[i]=cut_value[i];  y[i]=bin_content_vector[i];  exl[i]=0; exh[i]=0;  eylstat[i]=bin_content_error_vector[i]; eyhstat[i]=bin_content_error_vector[i];
      
-     if( (cut_value[i]>0.779) && (cut_value[i]<0.781) ){   eylsys[i] = bin_content_error_vector[i]; eyhsys[i] = bin_content_error_vector[i]; }
+     if( (cut_value[i]>opt_bdt_min) && (cut_value[i]<opt_bdt_max) ){   eylsys[i] = bin_content_error_vector[i]; eyhsys[i] = bin_content_error_vector[i]; }
      else{eylsys[i]=0;     eyhsys[i]=0;}
    }
-   auto gme = new TGraphMultiErrors("gme", "", bin_content_vector.size(), x, y, exl, exh, eylstat, eyhstat);
+   TGraphMultiErrors* gme = new TGraphMultiErrors("gme", "", bin_content_vector.size(), x, y, exl, exh, eylstat, eyhstat);
    gme->AddYError(bin_content_vector.size(), eylsys, eyhsys);
    gme->GetXaxis()->SetTitle("BDT selection");
    gme->GetYaxis()->SetTitle("Corrected yield");
-   gme->GetAttLine(0)->SetLineColor(kRed);
+   gme->GetAttLine(0)->SetLineColor(kRed);//change to blue for reconstructed and green to simulated
    gme->SetMarkerColor( kRed );
-   gme->GetAttLine(1)->SetLineColor(kBlue);
+   gme->GetAttLine(1)->SetLineColor(kBlue);//change to red for reconstructed
    gme->GetAttFill(1)->SetFillStyle(0);
    gme->SetMarkerStyle(20);
    return gme;
 }
 
+template<typename T>
+void Print_temp(string words, T value)
+{
+  std::cout<<words<< value << std::endl;
+}
+
+
+
+template<typename T, typename U>
+class latex_legend_sim {   
+  public:          
+    
+    TLatex* latex_sim_data_draw(T Fitter, Int_t sigma_for_yield, U sum_mc) 
+    { // Constructor with parameters
+      Double_t signal_s, signal_errs;
+      Fitter->Signal(sigma_for_yield,signal_s,signal_errs);  
+      TLatex* latex_sim_data = new TLatex ();
+      latex_sim_data -> SetNDC ();                latex_sim_data -> SetTextSize (0.03);
+      latex_sim_data -> DrawLatex (0.5 ,0.55, Form(  "#color[3]{yield = in %0.1d #sigma %0.1f#pm %0.1f ; MC %0.2f}",sigma_for_yield ,signal_s, signal_errs, sum_mc   ));
+      latex_sim_data -> DrawLatex (0.5 ,0.52, Form(  "#color[3]{Yield/MC = %0.3f#pm%0.3f}", (signal_s)/(sum_mc) ,(  (signal_s)/ (sum_mc)   )*(TMath::Sqrt( (signal_errs/signal_s )*(signal_errs/signal_s ) + (TMath::Sqrt(sum_mc)/sum_mc)*(TMath::Sqrt(sum_mc)/sum_mc) ))    ));
+      latex_sim_data -> DrawLatex (0.5 ,0.45, Form("#color[3]{#sigma = %0.4f #pm %0.5f;} ",Fitter->GetSigma(),Fitter->GetSigmaUncertainty()));
+      latex_sim_data -> DrawLatex (0.5 ,0.4, Form("#color[3]{#mu = %0.4f #pm %0.5f;}", Fitter->GetMean(),Fitter->GetMeanUncertainty()));
+      latex_sim_data -> DrawLatex (0.5 ,0.35, Form("#color[3]{#chi^{2}_{red} = %0.3f }", Fitter->GetReducedChiSquare()));
+      return  latex_sim_data;
+    }
+    
+    
+   TLegend* legend_signal_only_draw(T Fitter)
+    {
+      TLegend* legend_signal_only = new TLegend(0.5,0.7,0.8,0.85);
+      legend_signal_only->SetTextSize(0.023);
+      legend_signal_only->AddEntry(Fitter->GetHistoClone(),"#Lambda hyperon signal only","pe,X0");
+      legend_signal_only->AddEntry(Fitter->GetSignalFunc(),"DSCB","l");
+      return legend_signal_only;  
+    }
+    
+    
+};
+
+
+
+
+template<typename T, typename U>
+  TLatex* latex_sim_data_draw(T Fitter, Int_t sigma_for_yield, U sum_mc)
+  {
+  Double_t signal_s, signal_errs;
+  Fitter->Signal(sigma_for_yield,signal_s,signal_errs);  
+  
+  TLatex* latex_sim_data = new TLatex ();
+  latex_sim_data -> SetNDC ();                latex_sim_data -> SetTextSize (0.03);
+  latex_sim_data -> DrawLatex (0.5 ,0.55, Form(  "#color[3]{yield = in %0.1i #sigma %0.1f#pm %0.1f ; MC %0.2f}",sigma_for_yield ,signal_s, signal_errs, sum_mc   ));
+  latex_sim_data -> DrawLatex (0.5 ,0.52, Form(  "#color[3]{Yield/MC = %0.3f#pm%0.3f}", (signal_s)/(sum_mc) ,(  (signal_s)/ (sum_mc)   )*(TMath::Sqrt( (signal_errs/signal_s )*(signal_errs/signal_s ) + (TMath::Sqrt(sum_mc)/sum_mc)*(TMath::Sqrt(sum_mc)/sum_mc) ))    ));
+  latex_sim_data -> DrawLatex (0.5 ,0.45, Form("#color[3]{#sigma = %0.4f #pm %0.5f;} ",Fitter->GetSigma(),Fitter->GetSigmaUncertainty()));
+  latex_sim_data -> DrawLatex (0.5 ,0.4, Form("#color[3]{#mu = %0.4f #pm %0.5f;}", Fitter->GetMean(),Fitter->GetMeanUncertainty()));
+  latex_sim_data -> DrawLatex (0.5 ,0.35, Form("#color[3]{#chi^{2}_{red} = %0.3f }", Fitter->GetReducedChiSquare()));
+  return latex_sim_data;
+  }
+  
+
+template<typename T>
+TLegend* legend_signal_only_draw(T Fitter)
+{
+  TLegend* legend_signal_only = new TLegend(0.5,0.7,0.8,0.85);
+  legend_signal_only->SetTextSize(0.023);
+  legend_signal_only->AddEntry(Fitter->GetHistoClone(),"#Lambda hyperon signal only","pe,X0");
+  legend_signal_only->AddEntry(Fitter->GetSignalFunc(),"DSCB","l");
+  return legend_signal_only;  
+}
+
+
+template<typename T>
+TLegend* legend_data_draw(T fitter)
+{
+  TLegend* legend = new TLegend(0.5,0.7,0.8,0.85);                  legend->SetTextSize(0.023);
+  legend->AddEntry(fitter->GetHistoClone(),"#Lambda hyperon","pe,X0");
+  legend->AddEntry(fitter->GetMassFunc(),Form("DSCB+pol%i",fitter->GetBackgroundRecalcFunc()->GetNpar()-1),"l");
+  legend->AddEntry(fitter->GetSignalFunc(),"DSCB","l");
+  legend->AddEntry(fitter->GetBackgroundRecalcFunc(),Form("pol%i",fitter->GetBackgroundRecalcFunc()->GetNpar()-1),"l");
+  legend->AddEntry(fitter->GetInitialBackgroundFit(),"Initial background fit","l");
+  legend->AddEntry(fitter->GetBackgroundFullRangeFunc(),"Initial background extended","l");
+  return legend; 
+}
 
