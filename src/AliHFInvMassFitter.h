@@ -100,11 +100,19 @@ class AliHFInvMassFitter : public TNamed {
     fa1UpperLim = a1UpperLim;
     fBounda1 = kTRUE;
   }
+  void SetFixDSCBa1(Double_t a1){
+    SetInitiala1(a1);
+    fFixeda1=kTRUE;
+  }  
   void SetBoundDSCBn1(Double_t n1, Double_t n1LowerLim, Double_t n1UpperLim){ 
     SetInitialn1(n1);
     fn1LowerLim = n1LowerLim;
     fn1UpperLim = n1UpperLim;
     fBoundn1 = kTRUE;
+  }
+  void SetFixDSCBn1(Double_t n1){
+    SetInitialn1(n1);
+    fFixedn1=kTRUE;
   }
   void SetBoundDSCBa2(Double_t a2 ,Double_t a2LowerLim, Double_t a2UpperLim){ 
     SetInitiala2(a2);
@@ -112,13 +120,20 @@ class AliHFInvMassFitter : public TNamed {
     fa2UpperLim = a2UpperLim;
     fBounda2 = kTRUE;
   }
+  void SetFixDSCBa2(Double_t a2){
+    SetInitiala2(a2);
+    fFixeda2=kTRUE;
+  }
   void SetBoundDSCBn2(Double_t n2, Double_t n2LowerLim, Double_t n2UpperLim){ 
     SetInitialn2(n2);
     fn2LowerLim = n2LowerLim;
     fn2UpperLim = n2UpperLim;
     fBoundn2 = kTRUE;
   }
-  
+  void SetFixDSCBn2(Double_t n2){
+    SetInitialn2(n2);
+    fFixedn2=kTRUE;
+  }  
   
   
   void SetFixSecondGaussianSigma(Double_t sigma){
