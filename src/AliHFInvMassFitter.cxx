@@ -367,10 +367,10 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   }
   fTotFunc = CreateTotalFitFunction("funcmass");
 
-  TFile* fileOut = new TFile("/home/shahid/Downloads/fileOut.root", "recreate");
-  fHistoInvMass->Write("histo");
-  fTotFunc->Write("func");
-  fileOut->Close();
+//  TFile* fileOut = new TFile("/home/shahid/Downloads/fileOut.root", "recreate");
+//  fHistoInvMass->Write("histo");
+//  fTotFunc->Write("func");
+//  fileOut->Close();
   
   
   
@@ -422,8 +422,9 @@ Int_t AliHFInvMassFitter::MassFitter(Bool_t draw){
   }
   fMass=fSigFunc->GetParameter(1);
   fMassErr=fSigFunc->GetParError(1);
-  if ( (fTypeOfFit4Sgn==1) ){  if(fSigFunc->GetParameter(2) >= fSigFunc->GetParameter(4) ) {fSigmaSgn=fSigFunc->GetParameter(2); fSigmaSgnErr=fSigFunc->GetParError(2);} if(fSigFunc->GetParameter(2) < fSigFunc->GetParameter(4)){fSigmaSgn=fSigFunc->GetParameter(4);fSigmaSgnErr=fSigFunc->GetParError(4);}  }//always choose the bigger sigma to be the main one in case of DG
-  else{fSigmaSgn=fSigFunc->GetParameter(2);fSigmaSgnErr=fSigFunc->GetParError(2);}
+  if ( (fTypeOfFit4Sgn==k2Gaus) && (fSigFunc->GetParameter(2) >= fSigFunc->GetParameter(4)) ){ fSigmaSgn=fSigFunc->GetParameter(2); fSigmaSgnErr=fSigFunc->GetParError(2);}
+  if((fTypeOfFit4Sgn==k2Gaus) && (fSigFunc->GetParameter(2) < fSigFunc->GetParameter(4))){fSigmaSgn=fSigFunc->GetParameter(4);fSigmaSgnErr=fSigFunc->GetParError(4);}  //always choose the bigger sigma to be the main one in case of DG
+  if((fTypeOfFit4Sgn!=k2Gaus)){fSigmaSgn=fSigFunc->GetParameter(2);fSigmaSgnErr=fSigFunc->GetParError(2);}
   
   fTotFunc->SetLineColor(4);
   fRawYield=fTotFunc->GetParameter(fNParsBkg)/fHistoInvMass->GetBinWidth(1);
@@ -546,8 +547,8 @@ Double_t AliHFInvMassFitter::CheckForSignal(Double_t mean, Double_t sigma){
   /// Checks if there are signal counts above the background
   ///   in the invariant mass region of the peak
 
-  Double_t minForSig=mean-4.*sigma;
-  Double_t maxForSig=mean+4.*sigma;
+  Double_t minForSig=mean-5.*sigma;//original 4
+  Double_t maxForSig=mean+5.*sigma;
   Int_t binForMinSig=fHistoInvMass->FindBin(minForSig);
   Int_t binForMaxSig=fHistoInvMass->FindBin(maxForSig);
   Double_t sum=0.;
@@ -693,6 +694,7 @@ TF1* AliHFInvMassFitter::CreateSignalFitFunction(TString fname, Double_t integsi
     funcsig->SetParameter(4,fSigmaSgn2Gaus);
     if(fFixedSigma2Gaus) funcsig->FixParameter(4,fSigmaSgn2Gaus);
     else funcsig->SetParLimits(4,0.000000001,0.9);
+    //if (fSigFunc->GetParameter(2)<  fSigFunc->GetParameter(4)){funcsig->SetParameter(4,fSigmaSgn); funcsig->SetParameter(2,fSigmaSgn2Gaus);}
     funcsig->SetParNames("SgnInt","Mean","Sigma1","Frac","Sigma2");
   }
   if(fTypeOfFit4Sgn==k2GausSigmaRatioPar){
@@ -1115,7 +1117,7 @@ Bool_t AliHFInvMassFitter::PrepareHighPolFit(TF1 *fback, Double_t integral){
       funcbkg->SetParameter(2,5);
     }
     printf("   ---> Pre-fit of background with pol degree %d ---\n",fCurPolDegreeBkg);
-    fHistoInvMass->Fit(funcbkg,"REMN","");
+    fHistoInvMass->Fit(funcbkg,"REMN0","");
     funcPrev=(TF1*)funcbkg->Clone("ftemp");
     delete funcbkg;
     fCurPolDegreeBkg++;
