@@ -16,17 +16,29 @@ using namespace std;
 
 
 template<typename h>
-auto PlotHistos(h hist)
+auto marker_setting(h hist)
 {
-  hist->SetMarkerColor(kBlack);
-  hist->SetMarkerSize(0.4);
-  hist->SetMarkerStyle(8);
-  hist->SetStats(0);
+  hist -> SetMarkerColor(kBlack);
+  hist -> SetLineColor(kBlack);
+  hist -> SetMarkerStyle(8);
+  hist -> SetStats(0);
+  hist -> GetXaxis()  -> CenterTitle();
+  hist -> GetYaxis()  -> CenterTitle();
+  hist -> SetLineWidth(1);
+  hist -> SetTitle ("");
+  hist -> GetXaxis()->SetRangeUser(1.09, 1.15);
+  return hist;
+}
+
+template<typename h>
+auto PlotHistos(h hist0)
+{
+  auto hist = marker_setting(hist0);
+  hist->SetMarkerSize(0.8);  
   hist->SetTitleSize(0.05);
   hist->SetYTitle("counts");
-  hist->GetYaxis()->CenterTitle();
   hist->GetYaxis()->SetMaxDigits(3);
-  hist->GetYaxis()->SetTitleOffset(0.7);
+  hist->GetYaxis()->SetTitleOffset(0.78);
   hist->GetYaxis()->SetLabelSize(0.05);
   hist->GetYaxis()->SetTitleSize(0.06);
   hist->GetXaxis()->SetTitleSize(0.05);
@@ -34,33 +46,26 @@ auto PlotHistos(h hist)
   hist->GetXaxis()->SetTitleOffset(1.2);
   hist->GetXaxis()->SetLabelSize(0.05);
   hist->GetXaxis()->SetTitle("Mass (GeV/c^{2})");
-  hist->GetXaxis()->CenterTitle();
   
-//  hist->GetYaxis()->SetRangeUser(0, 3000);
+  //hist->GetYaxis()->SetRangeUser(30000, 90000);
   return hist;
 }
 
 template<typename h>
-auto dif_hist(h hist) 
+auto dif_hist(h hist0) 
 {
-    hist -> SetLineWidth(1);
-    hist->SetMarkerColor(kBlack);
-    hist->SetMarkerStyle(8);
-    hist -> SetMarkerSize(0.1);
-    hist -> SetStats (0);
+    auto hist = marker_setting(hist0);
+    hist -> SetMarkerSize(0.8);
     hist -> GetXaxis() -> SetTitle("Mass (GeV/c^{2})");
-    hist -> SetTitle ("");
-    hist -> GetXaxis () -> SetLabelSize (0.1);
-    hist -> GetXaxis()  -> CenterTitle();
+    hist -> GetXaxis () -> SetLabelSize (0.12);
     hist -> GetXaxis () -> SetTitleSize (0.15);
     hist -> GetYaxis () -> SetLabelSize (0.1);
     hist -> GetYaxis () -> SetTitleSize (0.1);
     hist -> GetXaxis () -> SetTitleOffset (1.1);
-    hist -> GetYaxis () -> SetTitleOffset (0.3);
+    hist -> GetYaxis () -> SetTitleOffset (0.34);
     //ratio . GetYaxis ()-> SetTitle (" Data /MC");
     //207,512 divisions
     hist -> GetYaxis ()-> SetNdivisions (104);
-    hist->SetLineColor(kBlack);
     hist->SetYTitle("(d-f)/#Deltad");
     //hist -> GetXaxis () -> SetRangeUser(1.105,1.13);
     return hist;
@@ -68,17 +73,16 @@ auto dif_hist(h hist)
 
 TF1* PlotSignal(TF1* sig_func)
   {
-  sig_func->SetNpx(1000);
+  sig_func->SetNpx(500);
   sig_func->SetLineColor(kGreen);
   sig_func->SetLineStyle(2);
-  sig_func->SetLineWidth(4);
-  sig_func->SetLineWidth(2);
+  sig_func->SetLineWidth(6);
   return sig_func;
   }
 
 TF1* PlotBackground(TF1* bac_func)
   {  
-  bac_func->SetNpx(100);
+  bac_func->SetNpx(10000);
   //bac_func->SetLineStyle(3);
   bac_func->SetLineColor(kBlue);
   bac_func->SetLineWidth(4);
@@ -96,7 +100,7 @@ TF1* PlotMass(TF1* M_func)
   
 TCanvas* CreateCanvas(TString name)
   {
-    auto* canvas = new TCanvas(name,"", 500,500);
+    auto* canvas = new TCanvas(name,"", 800,800);
     canvas->SetBottomMargin(0.15);
     canvas->SetLeftMargin (0.15);
     return canvas;
@@ -265,7 +269,8 @@ TH2F* Divide2DHisto(const TH2F* h1, const TH2F* h2, const TString& name) {
   return res;
 }
 
-TH2F* eff_creator_new(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low1, vector<Double_t> &yield, vector<Double_t> &yield_error, vector<Double_t> &sim_mc_yield,TH2F* Mc_sim, Float_t &BDT, TH2F* Mc_sim_data, vector<Double_t> &pt_y_yield_bdt_0,Int_t check, vector<Double_t> mc_yield_data)
+template<typename pt_bin_typ, typename y_bin_typ, typename yield_typ, typename yield_err_typ, typename sim_mc_yield_typ, typename Y,typename Z, typename A, typename B, typename C >
+TH2F* eff_creator_new(pt_bin_typ y_bin_low1, y_bin_typ pt_bin_low1, yield_typ yield, yield_err_typ yield_error, sim_mc_yield_typ sim_mc_yield,Y Mc_sim,  Z Mc_sim_data, A pt_y_yield_bdt_0,B check, C mc_yield_data)
 {  
   
   TH2F* recons_data = new TH2F("recons_data", "recons_data", 10,0,3,10,0,3); 
@@ -276,18 +281,15 @@ TH2F* eff_creator_new(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low
   TH2F* recons_sim = new TH2F("recons_sim", "recons_sim", 10,0,3,10,0,3);
   
   //TH2F* recons_sim_bdt0 = new TH2F("recons_sim_bdt0", "recons_sim_bdt0", 10,0,3,10,0,3);
+  
+  TH2F* efficiency_hist = new TH2F("efficiency_hist", "efficiency_hist", 10,0,3,10,0,3); 
     
-  for (int i=0;i<100;i++)
-  {
-    Double_t y= y_bin_low1[i];
-    Double_t pT=pt_bin_low1[i];
-    Double_t y_bin = int((y+0.1)/0.3 + 1);
-    Double_t pT_bin = int((pT+0.1)/0.3 + 1);
-    recons_data->SetBinContent(y_bin, pT_bin, yield[i]);           recons_data->SetBinError(y_bin, pT_bin,yield_error[i]);
-    recons_sim->SetBinContent(y_bin,pT_bin,sim_mc_yield[i]);
+    recons_data->SetBinContent(recons_data->GetXaxis()->FindBin(y_bin_low1+0.01), recons_data->GetYaxis()->FindBin(pt_bin_low1+0.01), yield);    
+    recons_data->SetBinError(recons_data->GetXaxis()->FindBin(y_bin_low1+0.01), recons_data->GetYaxis()->FindBin(pt_bin_low1+0.01),yield_error);
+    recons_sim->SetBinContent(recons_sim->GetXaxis()->FindBin(y_bin_low1+0.01), recons_sim->GetYaxis()->FindBin(pt_bin_low1+0.01),sim_mc_yield);
     //recons_sim_bdt0->SetBinContent(y_bin,pT_bin,pt_y_yield_bdt_0[i]);//was added if we want ML efficiency correction
-    recons_data_mc->SetBinContent(y_bin,pT_bin,mc_yield_data[i]);
-  }
+    recons_data_mc->SetBinContent(recons_data_mc->GetXaxis()->FindBin(y_bin_low1+0.01), recons_data_mc->GetYaxis()->FindBin(pt_bin_low1+0.01),mc_yield_data);
+
   //auto eff = Divide2DHisto(recons_sim, Mc_sim, "eff");
   //auto eff_corr_yield = Divide2DHisto(recons_data, eff, "eff_corr");//change recons_data_mc back to recons_data
   //auto ratio = Divide2DHisto(eff_corr_yield,Mc_sim_data,"ratio");
@@ -295,14 +297,14 @@ TH2F* eff_creator_new(vector<Double_t> &y_bin_low1, vector<Double_t> &pt_bin_low
   
   TH2F* recons_clone =(TH2F*) recons_data->Clone(); recons_clone->Sumw2();//changed recons_data to recons_data_mc; change back
   TH2F* recons_sim_clone = (TH2F*) recons_sim->Clone(); recons_sim_clone->Sumw2();
-  recons_sim_clone->Divide(Mc_sim);
-  recons_clone->Divide(recons_sim_clone);
+  efficiency_hist->Divide(recons_sim_clone, Mc_sim, 1,1,"B");
+  recons_clone->Divide(efficiency_hist);
   //recons_clone->Sumw2();Mc_sim_data->Sumw2();
   if (check==1)
   {
   recons_clone->Divide(Mc_sim_data);
   }
-  delete recons_sim, recons_sim_clone, recons_data, recons_data_mc;
+  delete recons_sim, recons_sim_clone, recons_data, recons_data_mc, efficiency_hist;
   return recons_clone;  
   
   
@@ -363,17 +365,19 @@ TH1F* corrected_yield_hist(vector<Float_t> &bin_content_vector, double range_min
 }
 
 
-
+template<typename T>
 TGraphMultiErrors* bdt_vs_corrected_yield
-(vector<Float_t> &bin_content_vector, vector<Float_t> &cut_value,vector<Float_t> &bin_content_error_vector, Float_t &opt_bdt_min, Float_t &opt_bdt_max)
+(T &bin_content_vector, T &cut_value,T &bin_content_error_vector, Float_t &opt_bdt_min, Float_t &opt_bdt_max)
 {
   Double_t x[bin_content_vector.size()];             Double_t y[bin_content_vector.size()];          Double_t exl[bin_content_vector.size()];          Double_t exh[bin_content_vector.size()];   Double_t eylstat[bin_content_vector.size()];       Double_t eyhstat[bin_content_vector.size()]; Double_t eylsys[bin_content_vector.size()];Double_t eyhsys[bin_content_vector.size()];   
-   for (int i=0;i<=bin_content_vector.size();i++)
+   for (int i=0;i<bin_content_vector.size();i++)
    {
+     if ( (bin_content_vector[i]>0) && (cut_value[i]<1) && (cut_value[i]>0)   ){
      x[i]=cut_value[i];  y[i]=bin_content_vector[i];  exl[i]=0; exh[i]=0;  eylstat[i]=bin_content_error_vector[i]; eyhstat[i]=bin_content_error_vector[i];
      
      if( (cut_value[i]>opt_bdt_min) && (cut_value[i]<opt_bdt_max) ){   eylsys[i] = bin_content_error_vector[i]; eyhsys[i] = bin_content_error_vector[i]; }
      else{eylsys[i]=0;     eyhsys[i]=0;}
+     }
    }
    TGraphMultiErrors* gme = new TGraphMultiErrors("gme", "", bin_content_vector.size(), x, y, exl, exh, eylstat, eyhstat);
    gme->AddYError(bin_content_vector.size(), eylsys, eyhsys);
@@ -436,12 +440,12 @@ template<typename T, typename U>
   Fitter->Signal(sigma_for_yield,signal_s,signal_errs);  
   
   TLatex* latex_sim_data = new TLatex ();
-  latex_sim_data -> SetNDC ();                latex_sim_data -> SetTextSize (0.03);
-  latex_sim_data -> DrawLatex (0.5 ,0.55, Form(  "#color[3]{yield = in %0.1i #sigma %0.1f#pm %0.1f ; MC %0.2f}",sigma_for_yield ,signal_s, signal_errs, sum_mc   ));
-  latex_sim_data -> DrawLatex (0.5 ,0.52, Form(  "#color[3]{Yield/MC = %0.3f#pm%0.3f}", (signal_s)/(sum_mc) ,(  (signal_s)/ (sum_mc)   )*(TMath::Sqrt( (signal_errs/signal_s )*(signal_errs/signal_s ) + (TMath::Sqrt(sum_mc)/sum_mc)*(TMath::Sqrt(sum_mc)/sum_mc) ))    ));
-  latex_sim_data -> DrawLatex (0.5 ,0.45, Form("#color[3]{#sigma = %0.4f #pm %0.5f;} ",Fitter->GetSigma(),Fitter->GetSigmaUncertainty()));
-  latex_sim_data -> DrawLatex (0.5 ,0.4, Form("#color[3]{#mu = %0.4f #pm %0.5f;}", Fitter->GetMean(),Fitter->GetMeanUncertainty()));
-  latex_sim_data -> DrawLatex (0.5 ,0.35, Form("#color[3]{#chi^{2}_{red} = %0.3f }", Fitter->GetReducedChiSquare()));
+  latex_sim_data -> SetNDC ();                latex_sim_data -> SetTextSize (0.028);
+  latex_sim_data -> DrawLatex (0.25 ,0.2, Form(  "#color[3]{yield (DSCB integral) in %0.1i #sigma = %0.1f#pm %0.1f }",sigma_for_yield ,signal_s, signal_errs   ));
+  latex_sim_data -> DrawLatex (0.25 ,0.15, Form(  "#color[3]{#frac{Yield (DSCB integral)}{MC true counts} = %0.3f#pm%0.3f}", (signal_s)/(sum_mc) ,(  (signal_s)/ (sum_mc)   )*(TMath::Sqrt( (signal_errs/signal_s )*(signal_errs/signal_s ) + (TMath::Sqrt(sum_mc)/sum_mc)*(TMath::Sqrt(sum_mc)/sum_mc) ))    ));
+  latex_sim_data -> DrawLatex (0.4 ,0.4, Form("#color[3]{#sigma = %0.4f #pm %0.5f;} ",Fitter->GetSigma(),Fitter->GetSigmaUncertainty()));
+  latex_sim_data -> DrawLatex (0.4 ,0.35, Form("#color[3]{#mu = %0.4f #pm %0.5f;}", Fitter->GetMean(),Fitter->GetMeanUncertainty()));
+  latex_sim_data -> DrawLatex (0.3 ,0.3, Form("#color[3]{#chi^{2}_{red} = %0.3f }", Fitter->GetReducedChiSquare()));
   return latex_sim_data;
   }
   
@@ -449,7 +453,7 @@ template<typename T, typename U>
 template<typename T>
 TLegend* legend_signal_only_draw(T Fitter)
 {
-  TLegend* legend_signal_only = new TLegend(0.5,0.7,0.8,0.85);
+  TLegend* legend_signal_only = new TLegend(0.6,0.7,0.8,0.85);
   legend_signal_only->SetTextSize(0.023);
   legend_signal_only->AddEntry(Fitter->GetHistoClone(),"#Lambda hyperon signal only","pe,X0");
   legend_signal_only->AddEntry(Fitter->GetSignalFunc(),"DSCB","l");
@@ -465,8 +469,23 @@ TLegend* legend_data_draw(T fitter)
   legend->AddEntry(fitter->GetMassFunc(),Form("DSCB+pol%i",fitter->GetBackgroundRecalcFunc()->GetNpar()-1),"l");
   legend->AddEntry(fitter->GetSignalFunc(),"DSCB","l");
   legend->AddEntry(fitter->GetBackgroundRecalcFunc(),Form("pol%i",fitter->GetBackgroundRecalcFunc()->GetNpar()-1),"l");
-  legend->AddEntry(fitter->GetInitialBackgroundFit(),"Initial background fit","l");
+  //legend->AddEntry(fitter->GetInitialBackgroundFit(),"Initial background fit","l");
   legend->AddEntry(fitter->GetBackgroundFullRangeFunc(),"Initial background extended","l");
   return legend; 
 }
 
+template<typename T, typename U, typename hist_sim_data_typ, typename mc_sim_analysis_tree_qa, typename signal_counts, typename signal_counts_sigma>
+TH2F* eff_for_data_frame(T y_min, U pt_min,signal_counts s, signal_counts_sigma errs, hist_sim_data_typ hist_sim_data, mc_sim_analysis_tree_qa Mc_sim)
+{
+      TH2F* recons_sim = new TH2F("recons_sim", "recons_sim", 10,0,3,10,0,3);
+      recons_sim->SetBinContent(recons_sim->GetXaxis()->FindBin(y_min[0]+0.01), recons_sim->GetYaxis()->FindBin(pt_min[0]+0.01),hist_sim_data->GetEntries() );
+      TH2F* recons_data = new TH2F("recons_data", "recons_data", 10,0,3,10,0,3);
+      recons_data->SetBinContent(recons_data->GetXaxis()->FindBin(y_min[0]+0.01), recons_data->GetYaxis()->FindBin(pt_min[0]+0.01),s );
+      recons_data->SetBinError(recons_data->GetXaxis()->FindBin(y_min[0]+0.01), recons_data->GetYaxis()->FindBin(pt_min[0]+0.01),errs );
+  
+      TH2F* efficiency_hist = new TH2F("efficiency_hist", "efficiency_hist", 10,0,3,10,0,3); 
+      efficiency_hist->Divide(recons_sim, Mc_sim, 1,1,"B");
+      recons_data->Divide(efficiency_hist);
+      delete recons_sim; delete efficiency_hist;
+      return recons_data;
+}
