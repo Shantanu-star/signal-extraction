@@ -4,7 +4,7 @@ This class can be used for fitting an invariant mass histogram. It has multiple 
 ## Installation
 For the installion of the class kindly follow the following steps:
 1. Clone this repository
-- `git clone git@git.cbm.gsi.de:sh.khan/signal_extraction.git`
+- `git clone https://github.com/Shantanu-star/signal-extraction.git`
 2. Source your ROOT
 - `source /path/to/root/install/bin/thisroot.sh`
 3. Make the build directory and go there 
